@@ -41,4 +41,4 @@ Whether you're setting up a new server or optimizing your existing one, **Phanto
 Clone the repository or download the latest release to your server’s `plugins` directory.
 
 ```bash
-git clone https://github.com/yourusername/PhantomVoting.git
+git clone https://github.com/PhantomDevelopmentMC/PhantomVoting.git
