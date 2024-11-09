@@ -1,0 +1,8 @@
+name: PhantomVoting
+version: '${project.version}'
+main: me.fergs.phantomvoting.PhantomVoting
+api-version: '1.20'
+softdepend:
+  - PlaceholderAPI
+depend:
+  - Votifier
