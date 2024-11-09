@@ -1,6 +1,6 @@
 # Phantom Voting
 
-![phantom](https://github.com/user-attachments/assets/17199ea8-f234-4f24-83a4-9241449dd790))  
+![phantom](https://github.com/user-attachments/assets/17199ea8-f234-4f24-83a4-9241449dd790)
 *Phantom Voting: Seamless Minecraft voting system integration.*
 
 ---
