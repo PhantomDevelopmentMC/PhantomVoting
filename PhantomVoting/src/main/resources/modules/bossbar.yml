@@ -1,0 +1,22 @@
+# Bossbar Configuration for Phantom Voting Plugin
+
+# Title of the bossbar. Can include color codes for customizations.
+Title: "&6Vote Party Progress"
+
+# The maximum required votes for the vote party to be triggered.
+VotesRequired: 100 # Adjust this to your desired number of required votes
+
+# The current number of votes (this will be dynamically updated in-game).
+CurrentVotes: 0 # This will be updated during gameplay, ideally through your voting system
+
+# The color of the bossbar. Options: "red", "blue", "green", "yellow", "purple", "pink", "white", "gray"
+BarColor: "green"
+
+# The style of the progress bar. Options: "solid", "segmented"
+BarStyle: "solid"
+
+# Whether the bossbar should be removed after the vote party is triggered.
+RemoveAfterCompletion: true
+
+# Sound played when the vote party is completed.
+CompletionSound: "ENTITY_PLAYER_LEVELUP" # Example: Sound when vote party is triggered

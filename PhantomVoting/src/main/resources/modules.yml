@@ -1,0 +1,7 @@
+Modules:
+  Bossbar:
+    Enabled: true
+  Leaderboards:
+    Enabled: true
+  ParticleEffects:
+    Enabled: true
