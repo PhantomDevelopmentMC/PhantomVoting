@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class VoteStorage {
-
     private Connection connection;
     /**
      * Creates a new VoteStorage instance.
@@ -51,7 +50,6 @@ public class VoteStorage {
             stmt.execute(createVotePartyTableSQL);
         }
     }
-
     /**
      * Adds a vote to the specified player's record and updates the timestamps.
      * If a timestamp is expired, it resets the count and updates the timestamp.
@@ -193,7 +191,6 @@ public class VoteStorage {
             e.printStackTrace();
         }
     }
-
     /**
      * Gets the current global vote count.
      * @return The current global vote count
@@ -210,7 +207,6 @@ public class VoteStorage {
         }
         return 0;
     }
-
     /**
      * Closes the database connection.
      */

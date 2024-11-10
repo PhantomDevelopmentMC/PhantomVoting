@@ -15,21 +15,29 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manages the bossbar for the vote party.
+ * @param <T> the plugin instance
+ */
 public class BossbarManager<T extends PhantomVoting> {
     private final T plugin;
     private final Map<Player, BossBar> activeBossBars = new HashMap<>();
     private int votesRequired;
     private String title;
     private String completionSound;
-    private boolean removeAfterCompletion;
     private final boolean isModuleEnabled;
-
+    /**
+     * Creates a new bossbar manager.
+     * @param plugin the plugin instance
+     */
     public BossbarManager(T plugin) {
         this.plugin = plugin;
         this.isModuleEnabled = true;
         loadConfig();
     }
-
+    /**
+     * Loads the bossbar configuration.
+     */
     public void loadConfig() {
         if (!isModuleEnabled) return;
 
@@ -38,7 +46,6 @@ public class BossbarManager<T extends PhantomVoting> {
             title = bossbarConfig.getString("Title", "&6Vote Party Progress");
             votesRequired = bossbarConfig.getInt("VotesRequired", 100);
             completionSound = bossbarConfig.getString("CompletionSound", "ENTITY_PLAYER_LEVELUP");
-            removeAfterCompletion = bossbarConfig.getBoolean("RemoveAfterCompletion", true);
         } else {
             plugin.getLogger().warning("Bossbar config is not found or configured properly.");
         }
@@ -66,7 +73,10 @@ public class BossbarManager<T extends PhantomVoting> {
             }
         }
     }
-
+    /**
+     * Adds the bossbar to a player.
+     * @param player the player to add the bossbar to
+     */
     private void addToPlayer(Player player) {
         if (!isModuleEnabled) return;
 
@@ -75,7 +85,10 @@ public class BossbarManager<T extends PhantomVoting> {
         assert bossBar != null;
         bossBar.addPlayer(player);
     }
-
+    /**
+     * Creates the bossbar.
+     * @return the bossbar
+     */
     private BossBar createBossBar() {
         if (!isModuleEnabled) return null;
 
@@ -103,22 +116,36 @@ public class BossbarManager<T extends PhantomVoting> {
         bossBar.setVisible(true);
         return bossBar;
     }
-
+    /**
+     * Triggers the vote party for a player.
+     * @param player the player to trigger the vote party for
+     */
     private void triggerVoteParty(Player player) {
         if (!isModuleEnabled) return;
         player.playSound(player.getLocation(), Sound.valueOf(completionSound), 1.0f, 1.0f);
     }
+    /**
+     *  Adds the bossbar to a player.
+     * @param event the player join event
+     */
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isModuleEnabled) {
             addToPlayer(event.getPlayer());
         }
     }
+    /**
+     * Removes the bossbar from a player.
+     * @param event the player quit event
+     */
     public void onPlayerLeave(PlayerQuitEvent event) {
         if (isModuleEnabled) {
             removeFromPlayer(event.getPlayer());
         }
     }
-
+    /**
+     * Removes the bossbar from a player.
+     * @param player the player to remove the bossbar from
+     */
     private void removeFromPlayer(Player player) {
         if (activeBossBars.containsKey(player)) {
             BossBar bossBar = activeBossBars.get(player);

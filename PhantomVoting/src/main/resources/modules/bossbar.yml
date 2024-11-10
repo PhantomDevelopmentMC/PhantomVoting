@@ -12,11 +12,5 @@ BarColor: "green"
 # The style of the progress bar. Options: "solid", "segmented"
 BarStyle: "solid"
 
-# Update interval in seconds (controls how frequently the progress bar is updated).
-ProgressUpdateInterval: 1
-
-# Whether the bossbar should be removed after the vote party is triggered.
-RemoveAfterCompletion: true
-
 # Sound played when the vote party is completed.
 CompletionSound: "ENTITY_PLAYER_LEVELUP" # Example: Sound when vote party is triggered

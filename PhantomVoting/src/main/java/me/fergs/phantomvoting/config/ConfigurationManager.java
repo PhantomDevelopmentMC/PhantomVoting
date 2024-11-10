@@ -58,14 +58,12 @@ public class ConfigurationManager<T extends JavaPlugin> {
     public void  loadModules() {
         YamlConfigFile modulesConfig = getConfig("modules");
         enabledModules = new ArrayList<>();
-
         if (modulesConfig != null) {
             ConfigurationSection modulesSection = modulesConfig.getConfigurationSection("Modules");
 
             if (modulesSection != null) {
                 for (String moduleName : modulesSection.getKeys(false)) {
                     boolean isEnabled = modulesSection.getBoolean(moduleName + ".Enabled", false);
-
                     Module module = new Module(moduleName, isEnabled);
                     if (module.isEnabled()) {
                         plugin.getLogger().info("Enabling module: " + moduleName);

@@ -23,7 +23,10 @@ public final class PhantomVoting extends JavaPlugin {
     private MessageManager messageManager;
     private VotePartyManager votePartyManager;
     private BossbarManager<PhantomVoting> bossbarManager;
-
+    /**
+     * Called when the plugin is loaded.
+     * This is where we register the Command API if it is not already loaded.
+     */
     @Override
     public void onLoad() {
         if (!CommandAPI.isLoaded()) {
@@ -51,11 +54,9 @@ public final class PhantomVoting extends JavaPlugin {
         new AdminCommands().register(this);
 
         if (configurationManager.isModuleEnabled("bossbar")) {
-            this.getLogger().info("Successfully enabled bossbar module.");
             bossbarManager = new BossbarManager<>(this);
         }
     }
-
     @Override
     public void onDisable() {
         voteStorage.close();
@@ -68,7 +69,6 @@ public final class PhantomVoting extends JavaPlugin {
     public static PhantomVoting getInstance() {
         return instance;
     }
-
     /**
      * Gets the listener registry.
      *
