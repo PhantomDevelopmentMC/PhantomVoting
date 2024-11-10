@@ -62,7 +62,7 @@ public class BossbarManager<T extends PhantomVoting> {
                     .replace("%votes_required%", String.valueOf(votesRequired)));
 
             if (currentVotes >= votesRequired) {
-                triggerVoteParty(player, bossBar);
+                triggerVoteParty(player);
             }
         }
     }
@@ -104,13 +104,8 @@ public class BossbarManager<T extends PhantomVoting> {
         return bossBar;
     }
 
-    private void triggerVoteParty(Player player, BossBar bossBar) {
+    private void triggerVoteParty(Player player) {
         if (!isModuleEnabled) return;
-
-        if (removeAfterCompletion) {
-            bossBar.removeAll();
-            activeBossBars.remove(player);
-        }
         player.playSound(player.getLocation(), Sound.valueOf(completionSound), 1.0f, 1.0f);
     }
     public void onPlayerJoin(PlayerJoinEvent event) {
