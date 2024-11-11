@@ -16,11 +16,6 @@ public class PlayerCommands{
                     plugin.getMessageManager().sendMessage(player, "VOTE_LIST",
                             "%daily_votes%", String.valueOf(plugin.getVoteStorage().getPlayerVoteCount(player.getUniqueId(), "daily")));
                 })
-                .withSubcommand(new CommandAPICommand("milestones")
-                        .executesPlayer((player, args) -> {
-                            plugin.getMessageManager().sendMessage(player, "MILESTONES");
-                        })
-                )
                 .withSubcommand(new CommandAPICommand("leaderboard")
                         .executesPlayer((player, args) -> {
                             player.openInventory(plugin.getLeaderboardInventory().createInventory(player));
