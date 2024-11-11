@@ -11,17 +11,23 @@ Leaderboard:
         - '0-10'
         - '17-26'
   player-position:
-    material: "ANVIL"
-    name: "&e&lPosition &8(&7#%position%&8)"
-    lore: []
+    material: "BEACON"
+    name: "&3&l[&b&l!&3&l] &b%player%'s Statistics &8(&7Read Below&8)"
+    lore:
+      - '&8sᴛᴀᴛɪsᴛɪᴄs'
+      - '&7&oFrom here you can view information on your voting'
+      - '&7&ostatistics. From your position, next refresh & more.'
+      - '&7'
+      - '&b&lInformation'
+      - '&3&l → &bNext Refresh: &f%refresh_time%'
+      - '&3&l → &bYour Position: &f#%position%'
     slot: 4
   null-head:
-    material: "ENCHANTING_TABLE"
-    name: "&8&lNo Votes Yet"
-    lore:
-      - "&7No one has voted yet."
+    material: "FIRE_CORAL_BLOCK"
+    name: "&4&l[&c&l!&4&l] &cNo User Data"
+    lore: []
 
 
 
 Settings:
-  leaderboard_refresh: 240 # Time in seconds to refresh the leaderboard
+  leaderboard_refresh: 60 # Time in seconds to refresh the leaderboard

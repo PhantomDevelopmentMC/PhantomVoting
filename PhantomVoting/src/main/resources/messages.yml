@@ -5,14 +5,16 @@ Messages:
       Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
     Message:
       Enable: true
-      Value: '&eConfiguration(s) have been reloaded.'
+      Value: '&6&l[&e&l!&6&l] &eConfiguration(s) have been reloaded.'
+
   VOTE_RECEIVED:
     Sound:
       Enable: true
       Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
     Message:
       Enable: true
-      Value: '&f%player% &evoted and received &f2x &bDiamonds &eand &f$500 &ein-game money. &8(&7/vote&8)'
+      Value: '&6&l[&e&l!&6&l] &f%player% &evoted and received &f2x &bDiamonds &eand &f$500 &ein-game money. &8(&7/vote&8)'
+
   VOTE_PARTY_TRIGGERED:
     Sound:
       Enable: true
@@ -20,6 +22,7 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eVote Party has been triggered! &8(&7/vote&8)'
+
   GIVE_VOTE:
     Sound:
       Enable: true
@@ -27,6 +30,8 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eSuccessfully added &f1x &6Vote(s) &eto &f%player%&e.'
+
+
   REMOVE_VOTE:
     Sound:
       Enable: true
@@ -34,6 +39,7 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eSuccessfully removed &f1x &6Vote(s) &efrom &f%player%&e.'
+
   TEST_VOTE:
     Sound:
       Enable: true
@@ -41,6 +47,7 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eSimulated a vote for &f%player%&e.'
+
   LEADERBOARD_REFRESH:
     Sound:
       Enable: true
@@ -48,6 +55,7 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eVote leaderboard has been refreshed.'
+
   VOTE_LIST:
     Sound:
       Enable: true
@@ -65,7 +73,10 @@ Messages:
         - ' &f&l→ &eVote Link &6#4'
         - ' &f&l→ &eVote Link &6#5'
         - ' '
+        - ' &f&l→ &eCurrent Votes: &6%daily_votes%'
+        - ' '
         - '&e&l&m                                          &r'
+
   ADMIN_HELP:
     Sound:
       Enable: true
