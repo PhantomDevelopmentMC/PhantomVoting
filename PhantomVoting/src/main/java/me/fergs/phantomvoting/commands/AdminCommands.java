@@ -20,12 +20,13 @@ public class AdminCommands {
                 .withAliases(plugin.getConfigurationManager().getConfig("config").getStringList("Commands.Admin.Aliases").toArray(new String[0]))
                 .withPermission("phantomvoting.admin")
                 .executes((player, args) -> {
-                    plugin.getMessageManager().sendMessage(player, "ADMIN_HELP");
+                    plugin.getMessageManager().sendMessage(player, "ADMIN_HELP", "%admin_command%", plugin.getConfigurationManager().getConfig("config").getString("Commands.Admin.Base", "phantomvoting"));
                 })
                 .withSubcommand(new CommandAPICommand("reload")
                         .executes((player, args) -> {
                             plugin.getConfigurationManager().reloadAllConfigs();
                             plugin.getVotePartyManager().reloadThreshold();
+                            plugin.getLeaderboardInventory().reloadInventory();
                             plugin.getMessageManager().sendMessage(player, "RELOAD");
                         })
                 )

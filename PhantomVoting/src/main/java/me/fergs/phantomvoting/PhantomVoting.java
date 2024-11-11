@@ -6,6 +6,8 @@ import me.fergs.phantomvoting.commands.AdminCommands;
 import me.fergs.phantomvoting.commands.PlayerCommands;
 import me.fergs.phantomvoting.config.ConfigurationManager;
 import me.fergs.phantomvoting.database.VoteStorage;
+import me.fergs.phantomvoting.inventories.LeaderboardInventory;
+import me.fergs.phantomvoting.listeners.InventoryClickListener;
 import me.fergs.phantomvoting.listeners.VoteReceiveListener;
 import me.fergs.phantomvoting.listeners.modules.BossbarEventsListener;
 import me.fergs.phantomvoting.managers.ListenerManager;
@@ -23,6 +25,7 @@ public final class PhantomVoting extends JavaPlugin {
     private MessageManager messageManager;
     private VotePartyManager votePartyManager;
     private BossbarManager<PhantomVoting> bossbarManager;
+    private LeaderboardInventory<PhantomVoting> leaderboardInventory;
     /**
      * Called when the plugin is loaded.
      * This is where we register the Command API if it is not already loaded.
@@ -39,14 +42,16 @@ public final class PhantomVoting extends JavaPlugin {
         listenerManager = new ListenerManager<>(this);
         listenerManager.registerListeners(
                 VoteReceiveListener.class,
-                BossbarEventsListener.class
+                BossbarEventsListener.class,
+                InventoryClickListener.class
         );
         configurationManager = new ConfigurationManager<>(this);
-        configurationManager.loadConfigs("config", "messages", "voteparty", "modules", "modules/bossbar");
+        configurationManager.loadConfigs("config", "messages", "voteparty", "modules", "modules/bossbar", "menus/leaderboard");
         configurationManager.loadModules();
         messageManager = new MessageManager(configurationManager);
         voteStorage = new VoteStorage("PhantomVoting");
         votePartyManager = new VotePartyManager(this);
+        leaderboardInventory = new LeaderboardInventory<>(this);
 
         new PlaceholderManager(voteStorage, votePartyManager).register();
 
@@ -116,5 +121,13 @@ public final class PhantomVoting extends JavaPlugin {
      */
     public BossbarManager<PhantomVoting> getBossbarManager() {
         return bossbarManager;
+    }
+    /**
+     * Gets the leaderboard inventory.
+     *
+     * @return the leaderboard inventory
+     */
+    public LeaderboardInventory<PhantomVoting> getLeaderboardInventory() {
+        return leaderboardInventory;
     }
 }

@@ -14,7 +14,8 @@ public class BossbarEventsListener implements Listener {
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        PhantomVoting.getInstance().getBossbarManager().onPlayerJoin(event);
+        if (PhantomVoting.getInstance().getConfigurationManager().isModuleEnabled("bossbar"))
+            PhantomVoting.getInstance().getBossbarManager().onPlayerJoin(event);
     }
     /**
      * Handles a player leave event.
@@ -23,6 +24,7 @@ public class BossbarEventsListener implements Listener {
      */
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        PhantomVoting.getInstance().getBossbarManager().onPlayerLeave(event);
+        if (PhantomVoting.getInstance().getConfigurationManager().isModuleEnabled("bossbar"))
+            PhantomVoting.getInstance().getBossbarManager().onPlayerLeave(event);
     }
 }

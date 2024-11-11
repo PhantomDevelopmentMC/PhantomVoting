@@ -129,18 +129,14 @@ public class BossbarManager<T extends PhantomVoting> {
      * @param event the player join event
      */
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (isModuleEnabled) {
-            addToPlayer(event.getPlayer());
-        }
+        addToPlayer(event.getPlayer());
     }
     /**
      * Removes the bossbar from a player.
      * @param event the player quit event
      */
     public void onPlayerLeave(PlayerQuitEvent event) {
-        if (isModuleEnabled) {
-            removeFromPlayer(event.getPlayer());
-        }
+        removeFromPlayer(event.getPlayer());
     }
     /**
      * Removes the bossbar from a player.

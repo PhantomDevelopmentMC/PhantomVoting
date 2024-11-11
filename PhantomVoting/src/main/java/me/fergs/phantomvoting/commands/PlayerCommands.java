@@ -21,6 +21,11 @@ public class PlayerCommands{
                             plugin.getMessageManager().sendMessage(player, "MILESTONES");
                         })
                 )
+                .withSubcommand(new CommandAPICommand("leaderboard")
+                        .executesPlayer((player, args) -> {
+                            player.openInventory(plugin.getLeaderboardInventory().createInventory(player));
+                        })
+                )
                 .register();
     }
 }

@@ -1,0 +1,27 @@
+Leaderboard:
+  title: "&8Vote Top Leaderboard"
+  player-slots:
+    - '10-16'
+  filler:
+    "panels":
+      material: "GRAY_STAINED_GLASS_PANE"
+      name: "&8"
+      lore: []
+      slots:
+        - '0-10'
+        - '17-26'
+  player-position:
+    material: "ANVIL"
+    name: "&e&lPosition &8(&7#%position%&8)"
+    lore: []
+    slot: 4
+  null-head:
+    material: "ENCHANTING_TABLE"
+    name: "&8&lNo Votes Yet"
+    lore:
+      - "&7No one has voted yet."
+
+
+
+Settings:
+  leaderboard_refresh: 240 # Time in seconds to refresh the leaderboard

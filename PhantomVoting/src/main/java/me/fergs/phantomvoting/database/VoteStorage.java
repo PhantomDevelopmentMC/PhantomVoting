@@ -1,7 +1,11 @@
 package me.fergs.phantomvoting.database;
 
+import me.fergs.phantomvoting.objects.PlayerVoteData;
+
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class VoteStorage {
@@ -201,6 +205,47 @@ public class VoteStorage {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt("current_vote_count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    /**
+     * Gets the top players based on all-time vote count.
+     * @return A list of PlayerVoteData objects
+     */
+    public List<PlayerVoteData> getTopPlayers() {
+        String querySQL = "SELECT uuid, all_time_count FROM player_votes ORDER BY all_time_count DESC LIMIT 10";
+        List<PlayerVoteData> topPlayers = new ArrayList<>();
+
+        try (PreparedStatement pstmt = connection.prepareStatement(querySQL)) {
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                int count = rs.getInt("all_time_count");
+                topPlayers.add(new PlayerVoteData(uuid, count));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return topPlayers;
+    }
+    /**
+     * Gets the position of a player in the all-time vote leaderboard.
+     * @param playerId UUID of the player
+     * @return The player's position in the leaderboard
+     */
+    public int getPlayerPosition(UUID playerId) {
+        String querySQL = "SELECT COUNT(*) + 1 AS position FROM player_votes WHERE all_time_count > (SELECT all_time_count FROM player_votes WHERE uuid = ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(querySQL)) {
+            pstmt.setString(1, playerId.toString());
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("position");
             }
         } catch (SQLException e) {
             e.printStackTrace();
