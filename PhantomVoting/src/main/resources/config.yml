@@ -21,14 +21,12 @@ Rewards:
   # Vote Rewards
   VoteRewards:
     "Common":
-      Weight: 5                   # Weight for chance-based selection (optional)
       Chance: 100                 # Percentage chance for this reward (100 = guaranteed)
       Commands:                   # List of commands to run if this reward is selected
         - "give %player% minecraft:gold_ingot 3"
       Random: false               # If true, randomly chooses one command
 
     "Rare":
-      Weight: 1
       Chance: 10                  # 10% chance to receive this rare reward
       Commands:
         - "give %player% minecraft:diamond_block 1"
