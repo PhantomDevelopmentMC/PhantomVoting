@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InventoryUtil {
     /**
@@ -53,10 +54,12 @@ public class InventoryUtil {
      * @param path   The path to the item.
      * @return The item.
      */
-    public static ItemStack createItem(ConfigurationSection config, String path) {
+    public static ItemStack createItem(ConfigurationSection config, String path, String... placeholders) {
         Material material = Material.valueOf(config.getString(path + ".material", "STONE"));
         String name = config.getString(path + ".name", "");
         List<String> lore = config.getStringList(path + ".lore");
+        name = MessageParser.parseKeyedValues(name, placeholders);
+        lore = lore.stream().map(line -> MessageParser.parseKeyedValues(line, placeholders)).collect(Collectors.toList());
 
         return ItemBuilder.create(material)
                 .setName(name)

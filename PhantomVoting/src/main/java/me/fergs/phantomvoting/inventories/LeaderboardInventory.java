@@ -7,32 +7,34 @@ import me.fergs.phantomvoting.inventories.interfaces.InventoryInterface;
 import me.fergs.phantomvoting.objects.InventoryFiller;
 import me.fergs.phantomvoting.objects.PlayerVoteData;
 import me.fergs.phantomvoting.utils.Color;
+import me.fergs.phantomvoting.utils.FormatUtil;
 import me.fergs.phantomvoting.utils.InventoryUtil;
 import me.fergs.phantomvoting.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class LeaderboardInventory<T extends PhantomVoting> implements InventoryInterface {
 
     private final T plugin;
     private int refreshInterval;
+    private long lastRefreshTime;
     private int inventorySize;
     private String inventoryTitle;
     private List<String> playerSlots = new ArrayList<>();
     private List<InventoryFiller> fillers = new ArrayList<>();
-    private ItemStack playerPositionItem;
     private ItemStack nullHeadItem;
     private YamlConfigFile config;
+    private List<PlayerVoteData> cachedTopPlayers = new ArrayList<>();
+    private final Map<UUID, String> playerNameCache = new HashMap<>();
     /**
      * Creates a new leaderboard inventory.
      *
@@ -41,6 +43,7 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
     public LeaderboardInventory(T plugin) {
         this.plugin = plugin;
         loadConfig();
+        this.refreshInterval = config.getInt("Settings.leaderboard_refresh", 240);
         startRefreshingLeaderboard();
     }
     /**
@@ -48,49 +51,50 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
      */
     private void loadConfig() {
         config = plugin.getConfigurationManager().getConfig("menus/leaderboard");
-
-        this.refreshInterval = config.getInt("Settings.leaderboard_refresh", 240);
         this.playerSlots = config.getStringList("Leaderboard.player-slots");
-        this.playerPositionItem = InventoryUtil.createItem(config, "Leaderboard.player-position");
         this.inventorySize = config.getInt("Leaderboard.size", 27);
-        this.inventoryTitle = config.getString("Leaderboard.title", "&8Vote Top Leaderboard");
+        this.inventoryTitle = Color.hex(config.getString("Leaderboard.title", "&8Vote Top Leaderboard"));
         this.nullHeadItem = InventoryUtil.createItem(config, "Leaderboard.null-head");
 
         loadFillers();
     }
+    /**
+     * Creates the inventory.
+     *
+     * @param player The player.
+     * @return The inventory.
+     */
     @Override
     public Inventory createInventory(Player player) {
         LeaderboardInventoryHolder holder = new LeaderboardInventoryHolder(inventoryTitle);
-        Inventory inventory = Bukkit.createInventory(holder, inventorySize, Color.hex(inventoryTitle));
+        Inventory inventory = Bukkit.createInventory(holder, inventorySize, inventoryTitle);
         fillers.forEach(filler -> {
             filler.getSlots().forEach(slots -> {
                 slots.forEach(slot -> inventory.setItem(slot, filler.getItem()));
             });
         });
-
-        List<PlayerVoteData> topPlayers = plugin.getVoteStorage().getTopPlayers();
         int slotIndex = 0;
-
         for (String slotRange : playerSlots) {
             List<Integer> slots = InventoryUtil.parseSlotRange(slotRange);
             for (Integer slot : slots) {
-                if (slotIndex < topPlayers.size()) {
-                    PlayerVoteData playerData = topPlayers.get(slotIndex);
+                if (slotIndex < cachedTopPlayers.size()) {
+                    PlayerVoteData playerData = cachedTopPlayers.get(slotIndex);
                     ItemStack playerItem = createPlayerItem(playerData);
                     inventory.setItem(slot, playerItem);
                 } else {
-                    inventory.setItem(slot, nullHeadItem);
+                    inventory.setItem(slot, nullHeadItem != null ? nullHeadItem : new ItemStack(Material.BEDROCK));
                 }
                 slotIndex++;
             }
         }
         int playerPosition = plugin.getVoteStorage().getPlayerPosition(player.getUniqueId());
-        ItemStack positionItem = playerPositionItem.clone();
-        ItemMeta meta = positionItem.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName(Color.hex(meta.getDisplayName().replace("%position%", String.valueOf(playerPosition))));
+        ItemStack positionItem = InventoryUtil.createItem(
+                config,
+                "Leaderboard.player-position",
+                "%position%", String.valueOf(playerPosition),
+                "%refresh_time%", FormatUtil.formatTimeStamp((getNextRefreshTime() - (System.currentTimeMillis() / 1000))),
+                "%player%", getPlayerName(player.getUniqueId()));
         inventory.setItem(config.getInt("Leaderboard.player-position.slot"), positionItem);
-
         return inventory;
     }
     /**
@@ -102,14 +106,15 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
             public void run() {
                 refreshLeaderboardData();
             }
-        }.runTaskTimer(plugin, 0L, refreshInterval * 20L);
+        }.runTaskTimerAsynchronously(plugin, 0L, refreshInterval * 20L);
     }
     /**
-     * Refreshes the leaderboard data.
+     * Refreshes the leaderboard data and updates the cached top players.
      */
     private void refreshLeaderboardData() {
-        /* Refresh leaderboard data */
-        // TODO: Implement this method
+        cachedTopPlayers = plugin.getVoteStorage().getTopPlayers();
+        plugin.getMessageManager().broadcastMessage("LEADERBOARD_REFRESH");
+        lastRefreshTime = System.currentTimeMillis();
     }
     /**
      * Creates a player item for the leaderboard.
@@ -118,14 +123,14 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
      * @return The player item.
      */
     private ItemStack createPlayerItem(PlayerVoteData playerData) {
-        String playerName = Bukkit.getOfflinePlayer(playerData.getUuid()).getName();
+        String playerName = getPlayerName(playerData.getUuid());
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        ItemMeta meta = item.getItemMeta();
-        SkullMeta skullMeta = (SkullMeta) meta;
-        skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerData.getUuid()));
-        item.setItemMeta(skullMeta);
-        meta.setDisplayName(Color.hex("&6&l[&e&l!&6&l] &e" + playerName + " &8(&7" + playerData.getVoteCount() + " Votes&8)"));
-        item.setItemMeta(meta);
+        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
+        if (skullMeta != null) {
+            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerData.getUuid()));
+            skullMeta.setDisplayName(Color.hex("&6&l[&e&l!&6&l] &e" + playerName + " &8(&7" + playerData.getVoteCount() + " Votes&8)"));
+            item.setItemMeta(skullMeta);
+        }
         return item;
     }
     /**
@@ -154,6 +159,26 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
                 fillers.add(new InventoryFiller(fillerItem, slots));
             }
         }
+    }
+    /**
+     * Gets the player name from the cache or fetches it from the server.
+     *
+     * @param uuid The player UUID.
+     * @return The player name.
+     */
+    private String getPlayerName(UUID uuid) {
+        return playerNameCache.computeIfAbsent(uuid, id -> {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
+            return offlinePlayer.getName();
+        });
+    }
+    /**
+     * Gets the next refresh time.
+     *
+     * @return The next refresh time.
+     */
+    public long getNextRefreshTime() {
+        return (lastRefreshTime / 1000) + refreshInterval;
     }
     /**
      * Reloads the inventory.

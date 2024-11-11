@@ -41,6 +41,13 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eSimulated a vote for &f%player%&e.'
+  LEADERBOARD_REFRESH:
+    Sound:
+      Enable: true
+      Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eVote leaderboard has been refreshed.'
   VOTE_LIST:
     Sound:
       Enable: true
