@@ -16,6 +16,7 @@ import me.fergs.phantomvoting.managers.PlaceholderManager;
 import me.fergs.phantomvoting.managers.VotePartyManager;
 import me.fergs.phantomvoting.modules.bossbar.BossbarManager;
 import me.fergs.phantomvoting.modules.votereminder.VoteReminderTask;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PhantomVoting extends JavaPlugin {
@@ -74,6 +75,8 @@ public final class PhantomVoting extends JavaPlugin {
         if (configurationManager.isModuleEnabled("VoteReminder")) {
             voteReminderTask = new VoteReminderTask<>(this, configurationManager.getConfig("modules/vote_reminder").getString("Message"));
         }
+
+        new Metrics(this, 23888);
     }
     @Override
     public void onDisable() {

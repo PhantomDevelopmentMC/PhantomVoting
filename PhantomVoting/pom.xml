@@ -61,6 +61,11 @@
                             <pattern>dev.jorel.commandapi</pattern>
                             <shadedPattern>me.fergs.commandapi</shadedPattern>
                         </relocation>
+                        <!-- Relocate bStats -->
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>me.bstats</shadedPattern>
+                        </relocation>
                     </relocations>
                 </configuration>
             </plugin>
@@ -125,6 +130,12 @@
             <groupId>dev.jorel</groupId>
             <artifactId>commandapi-bukkit-shade</artifactId>
             <version>9.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

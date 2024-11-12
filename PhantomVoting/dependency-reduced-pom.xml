@@ -52,6 +52,10 @@
               <pattern>dev.jorel.commandapi</pattern>
               <shadedPattern>me.fergs.commandapi</shadedPattern>
             </relocation>
+            <relocation>
+              <pattern>org.bstats</pattern>
+              <shadedPattern>me.bstats</shadedPattern>
+            </relocation>
           </relocations>
         </configuration>
       </plugin>

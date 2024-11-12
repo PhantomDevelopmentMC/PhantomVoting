@@ -25,7 +25,7 @@ import java.util.*;
 public class LeaderboardInventory<T extends PhantomVoting> implements InventoryInterface {
 
     private final T plugin;
-    private int refreshInterval;
+    private final int refreshInterval;
     private long lastRefreshTime;
     private int inventorySize;
     private String inventoryTitle;
