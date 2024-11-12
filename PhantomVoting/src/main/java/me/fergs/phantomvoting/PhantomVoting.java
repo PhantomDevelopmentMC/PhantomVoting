@@ -15,6 +15,7 @@ import me.fergs.phantomvoting.managers.MessageManager;
 import me.fergs.phantomvoting.managers.PlaceholderManager;
 import me.fergs.phantomvoting.managers.VotePartyManager;
 import me.fergs.phantomvoting.modules.bossbar.BossbarManager;
+import me.fergs.phantomvoting.modules.votereminder.VoteReminderTask;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PhantomVoting extends JavaPlugin {
@@ -26,6 +27,7 @@ public final class PhantomVoting extends JavaPlugin {
     private VotePartyManager votePartyManager;
     private BossbarManager<PhantomVoting> bossbarManager;
     private LeaderboardInventory<PhantomVoting> leaderboardInventory;
+    private VoteReminderTask<PhantomVoting> voteReminderTask;
     /**
      * Called when the plugin is loaded.
      * This is where we register the Command API if it is not already loaded.
@@ -46,7 +48,15 @@ public final class PhantomVoting extends JavaPlugin {
                 InventoryClickListener.class
         );
         configurationManager = new ConfigurationManager<>(this);
-        configurationManager.loadConfigs("config", "messages", "voteparty", "modules", "modules/bossbar", "menus/leaderboard");
+        configurationManager.loadConfigs(
+                "config",
+                "messages",
+                "voteparty",
+                "modules",
+                "modules/bossbar",
+                "modules/vote_reminder",
+                "menus/leaderboard");
+
         configurationManager.loadModules();
         messageManager = new MessageManager(configurationManager);
         voteStorage = new VoteStorage("PhantomVoting");
@@ -60,6 +70,9 @@ public final class PhantomVoting extends JavaPlugin {
 
         if (configurationManager.isModuleEnabled("bossbar")) {
             bossbarManager = new BossbarManager<>(this);
+        }
+        if (configurationManager.isModuleEnabled("VoteReminder")) {
+            voteReminderTask = new VoteReminderTask<>(this, configurationManager.getConfig("modules/vote_reminder").getString("Message"));
         }
     }
     @Override
@@ -129,5 +142,13 @@ public final class PhantomVoting extends JavaPlugin {
      */
     public LeaderboardInventory<PhantomVoting> getLeaderboardInventory() {
         return leaderboardInventory;
+    }
+    /**
+     * Gets the vote reminder task.
+     *
+     * @return the vote reminder task
+     */
+    public VoteReminderTask<PhantomVoting> getVoteReminderTask() {
+        return voteReminderTask;
     }
 }
