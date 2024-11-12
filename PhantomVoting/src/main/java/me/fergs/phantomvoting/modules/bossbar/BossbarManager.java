@@ -91,28 +91,26 @@ public class BossbarManager<T extends PhantomVoting> {
      */
     private BossBar createBossBar() {
         if (!isModuleEnabled) return null;
-
         ConfigurationSection bossbarConfig = plugin.getConfigurationManager().getConfig("modules/bossbar").getConfigurationSection("");
         BarColor barColor = BarColor.GREEN;
         BarStyle barStyle = BarStyle.SOLID;
 
         assert bossbarConfig != null;
-        String barColorConfig = bossbarConfig.getString("BarColor", "green").toLowerCase();
-        String barStyleConfig = bossbarConfig.getString("BarStyle", "solid").toLowerCase();
+        String barColorConfig = bossbarConfig.getString("BarColor", "green").toUpperCase();
+        String barStyleConfig = bossbarConfig.getString("BarStyle", "solid").toUpperCase();
 
-        if (barColorConfig.equals("red")) {
-            barColor = BarColor.RED;
-        } else if (barColorConfig.equals("blue")) {
-            barColor = BarColor.BLUE;
+        try {
+            barColor = BarColor.valueOf(barColorConfig);
+            barStyle = BarStyle.valueOf(barStyleConfig);
+        } catch (IllegalArgumentException e) {
+            Bukkit.getLogger().warning("Invalid BarColor or BarStyle in Bossbar config.");
         }
 
-        if (barStyleConfig.equals("segmented")) {
-            barStyle = BarStyle.SEGMENTED_6;
-        }
-
-        BossBar bossBar = Bukkit.createBossBar(Color.hex(title)
+        String parsedTitle = title
                 .replace("%current_votes%", String.valueOf(PhantomVoting.getInstance().getVotePartyManager().getCurrentVoteCount()))
-                .replace("%votes_required%", String.valueOf(votesRequired)), barColor, barStyle);
+                .replace("%votes_required%", String.valueOf(votesRequired));
+
+        BossBar bossBar = Bukkit.createBossBar(parsedTitle, barColor, barStyle);
         bossBar.setVisible(true);
         return bossBar;
     }

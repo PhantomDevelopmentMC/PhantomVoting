@@ -3,6 +3,7 @@ package me.fergs.phantomvoting.database;
 import me.fergs.phantomvoting.objects.PlayerVoteData;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public class VoteStorage {
      * Initializes the database by creating the necessary table if it doesn't exist.
      */
     private void initializeDatabase() throws SQLException {
+        checkAndAddColumns();
         String createTableSQL = "CREATE TABLE IF NOT EXISTS player_votes (" +
                 "uuid TEXT PRIMARY KEY," +
                 "daily_count INTEGER DEFAULT 0," +
@@ -44,7 +46,9 @@ public class VoteStorage {
                 "daily_timestamp TEXT," +
                 "weekly_timestamp TEXT," +
                 "monthly_timestamp TEXT," +
-                "yearly_timestamp TEXT" +
+                "yearly_timestamp TEXT," +
+                "streak_count INTEGER DEFAULT 0," +
+                "last_vote_date TEXT" +
                 ");";
         String createVotePartyTableSQL = "CREATE TABLE IF NOT EXISTS vote_party (" +
                 "current_vote_count INTEGER DEFAULT 0);";
@@ -52,6 +56,31 @@ public class VoteStorage {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
             stmt.execute(createVotePartyTableSQL);
+        }
+    }
+
+    public void checkAndAddColumns() {
+        try {
+            String addStreakCountColumnQuery = "ALTER TABLE player_votes ADD COLUMN streak_count INTEGER DEFAULT 0";
+            String addLastVoteDateColumnQuery = "ALTER TABLE player_votes ADD COLUMN last_vote_date TEXT";
+            try (PreparedStatement stmt = connection.prepareStatement(addStreakCountColumnQuery)) {
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                if (!e.getMessage().contains("duplicate column name")) {
+                    throw e;
+                }
+            }
+
+            try (PreparedStatement stmt = connection.prepareStatement(addLastVoteDateColumnQuery)) {
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                if (!e.getMessage().contains("duplicate column name")) {
+                    throw e;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
     /**
@@ -100,6 +129,7 @@ public class VoteStorage {
                     }
 
                     incrementVote("all_time", playerUUID);
+                    addVoteStreak(playerUUID);
                 } else {
                     String insertSQL = "INSERT INTO player_votes(uuid, daily_count, weekly_count, monthly_count, yearly_count, all_time_count, " +
                             "daily_timestamp, weekly_timestamp, monthly_timestamp, yearly_timestamp) " +
@@ -246,6 +276,125 @@ public class VoteStorage {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt("position");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    /**
+     * Adds a vote streak for the specified player, updates streaks based on last vote date,
+     * and resets if they missed a day.
+     *
+     * @param playerUUID UUID of the player
+     */
+    public void addVoteStreak(UUID playerUUID) {
+        LocalDate today = LocalDate.now();
+        String currentTimestamp = today.toString();
+
+        try {
+            String selectSQL = "SELECT * FROM player_votes WHERE uuid = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
+                pstmt.setString(1, playerUUID.toString());
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    if (rs.getString("last_vote_date") == null || rs.getString("streak_count") == null) {
+                        incrementStreak(playerUUID, 1, currentTimestamp);
+                        return;
+                    }
+                    LocalDate lastVoteDate = LocalDate.parse(rs.getString("last_vote_date"));
+                    int currentStreak = rs.getInt("streak_count");
+
+                    if (lastVoteDate.equals(today.minusDays(1))) {
+                        incrementStreak(playerUUID, currentStreak + 1, currentTimestamp);
+                    } else if (lastVoteDate.isBefore(today.minusDays(1))) {
+                        resetStreak(playerUUID, currentTimestamp);
+                    } else {
+                        updateVoteDate(playerUUID, currentTimestamp);
+                    }
+                } else {
+                    String insertSQL = "INSERT INTO player_votes(uuid, daily_count, weekly_count, monthly_count, yearly_count, " +
+                            "all_time_count, streak_count, last_vote_date, daily_timestamp, weekly_timestamp, monthly_timestamp, yearly_timestamp) " +
+                            "VALUES (?, 1, 1, 1, 1, 1, 1, ?, ?, ?, ?, ?)";
+                    try (PreparedStatement insertStmt = connection.prepareStatement(insertSQL)) {
+                        insertStmt.setString(1, playerUUID.toString());
+                        insertStmt.setString(2, currentTimestamp);
+                        insertStmt.setString(3, currentTimestamp);
+                        insertStmt.setString(4, currentTimestamp);
+                        insertStmt.setString(5, currentTimestamp);
+                        insertStmt.setString(6, currentTimestamp);
+                        insertStmt.executeUpdate();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Increments the streak count for the player and updates the last vote date.
+     *
+     * @param playerUUID UUID of the player
+     * @param newStreakCount New streak count to set
+     * @param currentTimestamp The current date as a timestamp
+     */
+    private void incrementStreak(UUID playerUUID, int newStreakCount, String currentTimestamp) {
+        String updateSQL = "UPDATE player_votes SET streak_count = ?, last_vote_date = ? WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
+            pstmt.setInt(1, newStreakCount);
+            pstmt.setString(2, currentTimestamp);
+            pstmt.setString(3, playerUUID.toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Resets the player's streak count and updates the last vote date.
+     *
+     * @param playerUUID UUID of the player
+     * @param currentTimestamp The current date as a timestamp
+     */
+    private void resetStreak(UUID playerUUID, String currentTimestamp) {
+        String updateSQL = "UPDATE player_votes SET streak_count = 1, last_vote_date = ? WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
+            pstmt.setString(1, currentTimestamp);
+            pstmt.setString(2, playerUUID.toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Updates only the last vote date without changing the streak count.
+     *
+     * @param playerUUID UUID of the player
+     * @param currentTimestamp The current date as a timestamp
+     */
+    private void updateVoteDate(UUID playerUUID, String currentTimestamp) {
+        String updateSQL = "UPDATE player_votes SET last_vote_date = ? WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
+            pstmt.setString(1, currentTimestamp);
+            pstmt.setString(2, playerUUID.toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Gets the current streak count for the player.
+     *
+     * @param playerUUID UUID of the player
+     * @return The player's current streak count
+     */
+    public int getPlayerStreak(UUID playerUUID) {
+        String querySQL = "SELECT streak_count FROM player_votes WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(querySQL)) {
+            pstmt.setString(1, playerUUID.toString());
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("streak_count");
             }
         } catch (SQLException e) {
             e.printStackTrace();

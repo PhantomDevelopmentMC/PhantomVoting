@@ -1,5 +1,6 @@
 package me.fergs.phantomvoting.modules.votereminder;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.fergs.phantomvoting.PhantomVoting;
 import me.fergs.phantomvoting.utils.Color;
 import org.bukkit.Bukkit;
@@ -28,7 +29,7 @@ public class VoteReminderTask<T extends PhantomVoting> extends BukkitRunnable {
         String[] lines = message.split("\n");
         Bukkit.getOnlinePlayers().forEach(player -> {
             for (String line : lines) {
-                player.sendMessage(Color.hex(line));
+                player.sendMessage(Color.hex(PlaceholderAPI.setPlaceholders(player, line)));
             }
         });
     }

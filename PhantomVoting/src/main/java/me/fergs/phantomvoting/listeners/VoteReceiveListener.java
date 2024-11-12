@@ -52,6 +52,8 @@ public class VoteReceiveListener implements Listener {
         }
 
         PhantomVoting.getInstance().getVotePartyManager().addVote();
-        PhantomVoting.getInstance().getBossbarManager().update();
+        if (PhantomVoting.getInstance().getConfigurationManager().isModuleEnabled("bossbar")) {
+            PhantomVoting.getInstance().getBossbarManager().update();
+        }
     }
 }

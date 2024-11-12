@@ -60,6 +60,15 @@ public enum PlaceholderType {
         }
     },
     /**
+     * The placeholder type for the player's vote streak.
+     */
+    VOTE_STREAK("vote_streak") {
+        @Override
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+            return String.valueOf(voteStorage.getPlayerStreak(player.getUniqueId()));
+        }
+    },
+    /**
      * The placeholder type for the vote party threshold.
      */
     VOTE_PARTY_THRESHOLD("vote_party_threshold") {

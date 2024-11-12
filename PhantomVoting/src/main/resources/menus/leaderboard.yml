@@ -1,8 +1,11 @@
 Leaderboard:
   title: "&8Vote Top Leaderboard"
+  # The leaderboard will be sorted by the votes in descending order.
+  # These slots will be filled with the top voters.
   player-slots:
     - '10-16'
   filler:
+    ## Create unlimited amount of fillers. Each filler will be placed in the specified slots.
     "panels":
       material: "GRAY_STAINED_GLASS_PANE"
       name: "&8"
@@ -10,6 +13,7 @@ Leaderboard:
       slots:
         - '0-10'
         - '17-26'
+  ## This is the players "info" slot. This will be the slot that the player can view their own statistics.
   player-position:
     material: "BEACON"
     name: "&3&l[&b&l!&3&l] &b%player%'s Statistics &8(&7Read Below&8)"
@@ -22,12 +26,11 @@ Leaderboard:
       - '&3&l → &bNext Refresh: &f%refresh_time%'
       - '&3&l → &bYour Position: &f#%position%'
     slot: 4
+  ## This item will be used if there's not enough voters to fill the leaderboard.
   null-head:
     material: "FIRE_CORAL_BLOCK"
     name: "&4&l[&c&l!&4&l] &cNo User Data"
     lore: []
-
-
 
 Settings:
   leaderboard_refresh: 60 # Time in seconds to refresh the leaderboard
