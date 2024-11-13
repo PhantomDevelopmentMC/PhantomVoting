@@ -28,7 +28,7 @@ public class AdminCommands {
                             plugin.getVotePartyManager().reloadThreshold();
                             plugin.getLeaderboardInventory().reloadInventory();
                             if (plugin.getConfigurationManager().isModuleEnabled("VoteReminder")) {
-                                plugin.getVoteReminderTask().reload();
+                                plugin.getVoteReminderManager().reloadTask("VoteReminder");
                             }
                             plugin.getMessageManager().sendMessage(player, "RELOAD");
                         })
