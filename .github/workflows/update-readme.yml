@@ -1,0 +1,36 @@
+name: Update README with Stats
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Fetch GitHub Stats and Update README
+        run: |
+          curl -s https://api.github.com/repos/${{ github.repository }}/traffic/clones -o clones.json
+          curl -s https://api.github.com/repos/${{ github.repository }}/traffic/views -o views.json
+
+          CLONES=$(jq '.count' clones.json)
+          UNIQUE_CLONERS=$(jq '.uniques' clones.json)
+          VIEWS=$(jq '.count' views.json)
+          UNIQUE_VISITORS=$(jq '.uniques' views.json)
+
+          # Replace the placeholders in README.md with fetched data
+          sed -i "s|<!--CLONES-->|$CLONES|" README.md
+          sed -i "s|<!--UNIQUE_CLONERS-->|$UNIQUE_CLONERS|" README.md
+          sed -i "s|<!--VIEWS-->|$VIEWS|" README.md
+          sed -i "s|<!--UNIQUE_VISITORS-->|$UNIQUE_VISITORS|" README.md
+
+      - name: Commit Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update README with latest clone and view stats"
+          git push
