@@ -7,8 +7,8 @@
 
 ## 📊 Project Stats
 
-- **📈 Clones**: <!--CLONES--> total, with <!--UNIQUE_CLONERS--> unique cloners
-- **👀 Views**: <!--VIEWS--> total, with <!--UNIQUE_VISITORS--> unique visitors
+- **📈 Clones**: null total, with null unique cloners
+- **👀 Views**: null total, with null unique visitors
 - **🌐 Languages**: Java (100%)
 - **🛠️ Dependencies**: [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13488/) (for vote handling)
 - **📅 Last Updated**: ![Last Commit](https://img.shields.io/github/last-commit/PhantomDevelopmentMC/PhantomVoting)
