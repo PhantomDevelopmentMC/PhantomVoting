@@ -83,6 +83,6 @@ If you encounter issues, have feature requests, or find bugs, please report them
 
 ## 📝 License
 
-Phantom Voting is open-source and licensed under the GNU License. See [LICENSE](LICENSE) for more details.
+Phantom Voting is open-source and licensed under the GPL 3.0 License. See [LICENSE](LICENSE) for more details.
 
 ---
