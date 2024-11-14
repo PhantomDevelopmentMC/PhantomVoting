@@ -7,10 +7,10 @@
 
 ## 📊 Project Stats
 
-- **💾 Downloads**: ![Downloads](https://img.shields.io/github/downloads/PhantomDevelopmentMC/PhantomVoting/total)
-- **⭐ Stars**: ![Stars](https://img.shields.io/github/stars/PhantomDevelopmentMC/PhantomVoting?style=social)
-- **🛠️ Dependencies**: [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13488/) (for vote handling)
+- **📈 Clones**: <!--CLONES--> total, with <!--UNIQUE_CLONERS--> unique cloners
+- **👀 Views**: <!--VIEWS--> total, with <!--UNIQUE_VISITORS--> unique visitors
 - **🌐 Languages**: Java (100%)
+- **🛠️ Dependencies**: [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13488/) (for vote handling)
 - **📅 Last Updated**: ![Last Commit](https://img.shields.io/github/last-commit/PhantomDevelopmentMC/PhantomVoting)
 
 ---
