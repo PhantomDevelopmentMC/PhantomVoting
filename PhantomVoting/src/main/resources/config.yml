@@ -11,6 +11,9 @@ Commands:
       - "phantomvoteadmin"
 
 # Voting Configuration for Rewards
+Sound:
+  enabled: true
+  soundType: "ENTITY_PLAYER_LEVELUP"
 Rewards:
   # These are the rewards that are given to the player when they vote, regardless of the vote site.
   Default:

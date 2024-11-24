@@ -3,6 +3,7 @@ package me.fergs.phantomvoting.listeners;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import me.fergs.phantomvoting.PhantomVoting;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,6 +35,19 @@ public class VoteReceiveListener implements Listener {
         List<String> defaultCommands = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getStringList("Rewards.Default.Commands");
         for (String command : defaultCommands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));
+        }
+        //add sound on vote receive
+        if(PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getBoolean("Sound.enabled")) {
+            String soundType = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getString("Sound.soundType");
+            if (soundType == null || soundType.equalsIgnoreCase("NONE")) {
+                return;
+            }
+            try {
+                Sound sound = Sound.valueOf(soundType);
+                player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
 
         ConfigurationSection voteRewardsSection = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getConfigurationSection("Rewards.VoteRewards");
