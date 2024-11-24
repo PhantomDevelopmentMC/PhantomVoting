@@ -110,7 +110,7 @@ public class BossbarManager<T extends PhantomVoting> {
                 .replace("%current_votes%", String.valueOf(PhantomVoting.getInstance().getVotePartyManager().getCurrentVoteCount()))
                 .replace("%votes_required%", String.valueOf(votesRequired));
 
-        BossBar bossBar = Bukkit.createBossBar(parsedTitle, barColor, barStyle);
+        BossBar bossBar = Bukkit.createBossBar(Color.hex(parsedTitle), barColor, barStyle);
         bossBar.setVisible(true);
         return bossBar;
     }

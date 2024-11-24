@@ -35,7 +35,6 @@ public class VoteStorage {
      * Initializes the database by creating the necessary table if it doesn't exist.
      */
     private void initializeDatabase() throws SQLException {
-        checkAndAddColumns();
         String createTableSQL = "CREATE TABLE IF NOT EXISTS player_votes (" +
                 "uuid TEXT PRIMARY KEY," +
                 "daily_count INTEGER DEFAULT 0," +
@@ -57,6 +56,8 @@ public class VoteStorage {
             stmt.execute(createTableSQL);
             stmt.execute(createVotePartyTableSQL);
         }
+
+        checkAndAddColumns();
     }
 
     public void checkAndAddColumns() {

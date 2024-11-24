@@ -1,5 +1,5 @@
 Modules:
   Bossbar:
-    Enabled: true
+    Enabled: false
   VoteReminder:
     Enabled: true
