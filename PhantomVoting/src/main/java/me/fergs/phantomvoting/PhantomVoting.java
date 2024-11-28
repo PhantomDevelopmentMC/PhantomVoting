@@ -7,6 +7,7 @@ import me.fergs.phantomvoting.commands.PlayerCommands;
 import me.fergs.phantomvoting.config.ConfigurationManager;
 import me.fergs.phantomvoting.database.VoteStorage;
 import me.fergs.phantomvoting.inventories.LeaderboardInventory;
+import me.fergs.phantomvoting.inventories.MilestonesInventory;
 import me.fergs.phantomvoting.listeners.InventoryClickListener;
 import me.fergs.phantomvoting.listeners.VoteReceiveListener;
 import me.fergs.phantomvoting.listeners.modules.BossbarEventsListener;
@@ -25,6 +26,7 @@ public final class PhantomVoting extends JavaPlugin {
     private BossbarManager<PhantomVoting> bossbarManager;
     private LeaderboardInventory<PhantomVoting> leaderboardInventory;
     private VoteReminderManager<PhantomVoting> voteReminderManager;
+    private MilestonesInventory<PhantomVoting> milestonesInventory;
     /**
      * Called when the plugin is loaded.
      * This is where we register the Command API if it is not already loaded.
@@ -52,7 +54,8 @@ public final class PhantomVoting extends JavaPlugin {
                 "modules",
                 "modules/bossbar",
                 "modules/vote_reminder",
-                "menus/leaderboard");
+                "menus/leaderboard",
+                "menus/milestones");
 
         configurationManager.loadModules();
         messageManager = new MessageManager(configurationManager);
@@ -71,6 +74,9 @@ public final class PhantomVoting extends JavaPlugin {
         if (configurationManager.isModuleEnabled("VoteReminder")) {
             voteReminderManager = new VoteReminderManager<>(this);
             voteReminderManager.reloadTask("VoteReminder");
+        }
+        if (configurationManager.isModuleEnabled("Milestones")) {
+            milestonesInventory = new MilestonesInventory<>(this);
         }
 
         new Metrics(this, 23888);
@@ -153,5 +159,13 @@ public final class PhantomVoting extends JavaPlugin {
      */
     public VoteReminderManager<PhantomVoting> getVoteReminderManager() {
         return voteReminderManager;
+    }
+    /**
+     * Gets the milestones inventory.
+     *
+     * @return the milestones inventory
+     */
+    public MilestonesInventory<PhantomVoting> getMilestonesInventory() {
+        return milestonesInventory;
     }
 }

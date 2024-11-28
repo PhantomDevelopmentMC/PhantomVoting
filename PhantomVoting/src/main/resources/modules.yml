@@ -3,3 +3,5 @@ Modules:
     Enabled: false
   VoteReminder:
     Enabled: true
+  Milestones:
+    Enabled: false

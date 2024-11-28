@@ -56,6 +56,24 @@ Messages:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eVote leaderboard has been refreshed.'
 
+
+  MILESTONE_ALREADY_CLAIMED:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou have already claimed this milestone.'
+
+
+  MILESTONE_NOT_ENOUGH_VOTES:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou need &f%votes_required% &evotes to unlock this milestone.'
+
   VOTE_LIST:
     Sound:
       Enable: true

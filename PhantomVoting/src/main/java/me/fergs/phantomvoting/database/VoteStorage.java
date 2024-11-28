@@ -52,9 +52,17 @@ public class VoteStorage {
         String createVotePartyTableSQL = "CREATE TABLE IF NOT EXISTS vote_party (" +
                 "current_vote_count INTEGER DEFAULT 0);";
 
+        String createMilestonesTableSQL = "CREATE TABLE IF NOT EXISTS player_milestones (" +
+                "uuid TEXT NOT NULL," +
+                "milestone_id INTEGER NOT NULL," +
+                "claimed BOOLEAN DEFAULT FALSE," +
+                "PRIMARY KEY (uuid, milestone_id)" +
+                ");";
+
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
             stmt.execute(createVotePartyTableSQL);
+            stmt.execute(createMilestonesTableSQL);
         }
 
         checkAndAddColumns();
@@ -401,6 +409,37 @@ public class VoteStorage {
             e.printStackTrace();
         }
         return 0;
+    }
+    /**
+     * Adds a milestone claim for the specified player.
+     *
+     * @param uuid UUID of the player
+     * @param milestoneId ID of the milestone
+     */
+    public boolean isMilestoneClaimed(UUID uuid, int milestoneId) throws SQLException {
+        String query = "SELECT claimed FROM player_milestones WHERE uuid = ? AND milestone_id = ?;";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, milestoneId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean("claimed");
+            }
+        }
+    }
+    /**
+     * Claims a milestone for the specified player.
+     *
+     * @param uuid UUID of the player
+     * @param milestoneId ID of the milestone
+     */
+    public void claimMilestone(UUID uuid, int milestoneId) throws SQLException {
+        String query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
+                "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, milestoneId);
+            ps.executeUpdate();
+        }
     }
     /**
      * Closes the database connection.

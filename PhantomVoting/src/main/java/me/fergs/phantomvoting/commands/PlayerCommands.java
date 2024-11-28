@@ -21,6 +21,14 @@ public class PlayerCommands{
                             player.openInventory(plugin.getLeaderboardInventory().createInventory(player));
                         })
                 )
+                .withSubcommand(new CommandAPICommand("milestones")
+                        .executesPlayer((player, args) -> {
+                            if (!plugin.getConfigurationManager().isModuleEnabled("Milestones")) {
+                                return;
+                            }
+                            player.openInventory(plugin.getMilestonesInventory().createInventory(player));
+                        })
+                )
                 .register();
     }
 }

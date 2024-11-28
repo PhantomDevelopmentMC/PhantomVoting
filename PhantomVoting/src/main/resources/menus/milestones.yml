@@ -1,0 +1,273 @@
+Milestones:
+  title: "&8&lVote Milestones"
+  size: 54
+  filler:
+    ## Create unlimited amount of fillers. Each filler will be placed in the specified slots.
+    "panels":
+      material: "GRAY_STAINED_GLASS_PANE"
+      name: "&8"
+      lore: [ ]
+      slots:
+        - '5-53'
+  settings:
+    use-delay: false # This is an animation, where each milestone (not filler) will be displayed one by one, causing a sequenced effect.
+    delay-ticks: 10
+  menu:
+    "#1":
+        required-votes: 10
+        slot: 0
+        Available:
+          material: "YELLOW_STAINED_GLASS_PANE"
+          name: "&e&lVote Milestone &6&l#1"
+          lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is available for claiming, doing"
+            - "&7&oso will grant you the reards below:"
+            - " "
+            - "&e&lRewards"
+            - "&6 → &f1x &eDiamond"
+            - "&6 → &2$&a500"
+            - " "
+            - "&7&o(( &f&oLeft-Click&7&oto claim this milestone ))"
+          commands:
+            - "give %player% minecraft:diamond 1"
+            - "eco give %player% 500"
+        Locked:
+          material: "RED_STAINED_GLASS_PANE"
+          name: "&c&lVote Milestone &4&l#1"
+          lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is locked, please complete"
+            - "&7&othe requirements below."
+            - " "
+            - "&c&lInformation"
+            - "&4 → &cVotes Required: &f10"
+            - " "
+            - "&7&o(( This milestone is &c&l&oLocked&7&o ))"
+        Claimed:
+          material: "LIME_STAINED_GLASS_PANE"
+          name: "&a&lVote Milestone &2&l#1"
+          lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone has already been claimed"
+            - " "
+            - "&a&lRewards"
+            - "&2 → &f1x &eDiamond"
+            - "&2 → &2$&a500"
+            - " "
+            - "&7&o(( This milestone has been &a&l&oClaimed&7&o ))"
+    "#2":
+        required-votes: 20
+        slot: 1
+        Available:
+          material: "YELLOW_STAINED_GLASS_PANE"
+          name: "&e&lVote Milestone &6&l#2"
+          lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is available for claiming, doing"
+            - "&7&oso will grant you the reards below:"
+            - " "
+            - "&e&lRewards"
+            - "&6 → &f1x &eDiamond"
+            - "&6 → &2$&a500"
+            - " "
+            - "&7&o(( &f&oLeft-Click&7&oto claim this milestone ))"
+          commands:
+            - "give %player% minecraft:diamond 1"
+            - "eco give %player% 500"
+        Locked:
+          material: "RED_STAINED_GLASS_PANE"
+          name: "&c&lVote Milestone &4&l#2"
+          lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is locked, please complete"
+            - "&7&othe requirements below."
+            - " "
+            - "&c&lInformation"
+            - "&4 → &cVotes Required: &f20"
+            - " "
+            - "&7&o(( This milestone is &c&l&oLocked&7&o ))"
+        Claimed:
+          material: "LIME_STAINED_GLASS_PANE"
+          name: "&a&lVote Milestone &2&l#2"
+          lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone has already been claimed"
+            - " "
+            - "&a&lRewards"
+            - "&2 → &f1x &eDiamond"
+            - "&2 → &2$&a500"
+            - " "
+            - "&7&o(( This milestone has been &a&l&oClaimed&7&o ))"
+    "#3":
+        required-votes: 30
+        slot: 2
+        Available:
+            material: "YELLOW_STAINED_GLASS_PANE"
+            name: "&e&lVote Milestone &6&l#3"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is available for claiming, doing"
+            - "&7&oso will grant you the reards below:"
+            - " "
+            - "&e&lRewards"
+            - "&6 → &f1x &eDiamond"
+            - "&6 → &2$&a500"
+            - " "
+            - "&7&o(( &f&oLeft-Click&7&oto claim this milestone ))"
+            commands:
+            - "give %player% minecraft:diamond 1"
+            - "eco give %player% 500"
+        Locked:
+            material: "RED_STAINED_GLASS_PANE"
+            name: "&c&lVote Milestone &4&l#3"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is locked, please complete"
+            - "&7&othe requirements below."
+            - " "
+            - "&c&lInformation"
+            - "&4 → &cVotes Required: &f30"
+            - " "
+            - "&7&o(( This milestone is &c&l&oLocked&7&o ))"
+        Claimed:
+            material: "LIME_STAINED_GLASS_PANE"
+            name: "&a&lVote Milestone &2&l#3"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone has already been claimed"
+            - " "
+            - "&a&lRewards"
+            - "&2 → &f1x &eDiamond"
+            - "&2 → &2$&a500"
+            - " "
+            - "&7&o(( This milestone has been &a&l&oClaimed&7&o ))"
+    "#4":
+        required-votes: 40
+        slot: 3
+        Available:
+            material: "YELLOW_STAINED_GLASS_PANE"
+            name: "&e&lVote Milestone &6&l#4"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is available for claiming, doing"
+            - "&7&oso will grant you the reards below:"
+            - " "
+            - "&e&lRewards"
+            - "&6 → &f1x &eDiamond"
+            - "&6 → &2$&a500"
+            - " "
+            - "&7&o(( &f&oLeft-Click&7&oto claim this milestone ))"
+            commands:
+            - "give %player% minecraft:diamond 1"
+            - "eco give %player% 500"
+        Locked:
+            material: "RED_STAINED_GLASS_PANE"
+            name: "&c&lVote Milestone &4&l#4"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is locked, please complete"
+            - "&7&othe requirements below."
+            - " "
+            - "&c&lInformation"
+            - "&4 → &cVotes Required: &f40"
+            - " "
+            - "&7&o(( This milestone is &c&l&oLocked&7&o ))"
+        Claimed:
+            material: "LIME_STAINED_GLASS_PANE"
+            name: "&a&lVote Milestone &2&l#4"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone has already been claimed"
+            - " "
+            - "&a&lRewards"
+            - "&2 → &f1x &eDiamond"
+            - "&2 → &2$&a500"
+            - " "
+            - "&7&o(( This milestone has been &a&l&oClaimed&7&o ))"
+    "#5":
+        required-votes: 50
+        slot: 4
+        Available:
+            material: "YELLOW_STAINED_GLASS_PANE"
+            name: "&e&lVote Milestone &6&l#5"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is available for claiming, doing"
+            - "&7&oso will grant you the reards below:"
+            - " "
+            - "&e&lRewards"
+            - "&6 → &f1x &eDiamond"
+            - "&6 → &2$&a500"
+            - " "
+            - "&7&o(( &f&oLeft-Click&7&oto claim this milestone ))"
+            commands:
+            - "give %player% minecraft:diamond 1"
+            - "eco give %player% 500"
+        Locked:
+            material: "RED_STAINED_GLASS_PANE"
+            name: "&c&lVote Milestone &4&l#5"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is locked, please complete"
+            - "&7&othe requirements below."
+            - " "
+            - "&c&lInformation"
+            - "&4 → &cVotes Required: &f50"
+            - " "
+            - "&7&o(( This milestone is &c&l&oLocked&7&o ))"
+        Claimed:
+            material: "LIME_STAINED_GLASS_PANE"
+            name: "&a&lVote Milestone &2&l#5"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone has already been claimed"
+            - " "
+            - "&a&lRewards"
+            - "&2 → &f1x &eDiamond"
+            - "&2 → &2$&a500"
+            - " "
+            - "&7&o(( This milestone has been &a&l&oClaimed&7&o ))"
+    "#6":
+        required-votes: 60
+        slot: 5
+        Available:
+            material: "YELLOW_STAINED_GLASS_PANE"
+            name: "&e&lVote Milestone &6&l#6"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is available for claiming, doing"
+            - "&7&oso will grant you the reards below:"
+            - " "
+            - "&e&lRewards"
+            - "&6 → &f1x &eDiamond"
+            - "&6 → &2$&a500"
+            - " "
+            - "&7&o(( &f&oLeft-Click&7&oto claim this milestone ))"
+            commands:
+            - "give %player% minecraft:diamond 1"
+            - "eco give %player% 500"
+        Locked:
+            material: "RED_STAINED_GLASS_PANE"
+            name: "&c&lVote Milestone &4&l#6"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone is locked, please complete"
+            - "&7&othe requirements below."
+            - " "
+            - "&c&lInformation"
+            - "&4 → &cVotes Required: &f60"
+            - " "
+            - "&7&o(( This milestone is &c&l&oLocked&7&o ))"
+        Claimed:
+            material: "LIME_STAINED_GLASS_PANE"
+            name: "&a&lVote Milestone &2&l#6"
+            lore:
+            - "&8Voting Milestone"
+            - "&7&oThis milestone has already been claimed"
+            - " "
+            - "&a&lRewards"
+            - "&2 → &f1x &eDiamond"
+            - "&2 → &2$&a500"
+            - " "
+            - "&7&o(( This milestone has been &a&l&oClaimed&7&o ))"

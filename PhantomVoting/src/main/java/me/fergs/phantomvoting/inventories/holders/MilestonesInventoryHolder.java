@@ -4,14 +4,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-public class LeaderboardInventoryHolder implements InventoryHolder, Listener {
+public class MilestonesInventoryHolder implements InventoryHolder, Listener {
+
     private final String title;
     /**
      * Creates a new leaderboard inventory holder.
      *
      * @param title The title of the inventory.
      */
-    public LeaderboardInventoryHolder(String title) {
+    public MilestonesInventoryHolder(String title) {
         this.title = title;
     }
     /**

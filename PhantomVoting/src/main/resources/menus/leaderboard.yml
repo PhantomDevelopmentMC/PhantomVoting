@@ -1,5 +1,6 @@
 Leaderboard:
   title: "&8Vote Top Leaderboard"
+  size: 27
   # The leaderboard will be sorted by the votes in descending order.
   # These slots will be filled with the top voters.
   player-slots:

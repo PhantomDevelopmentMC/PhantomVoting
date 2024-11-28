@@ -36,17 +36,13 @@ public class VoteReceiveListener implements Listener {
         for (String command : defaultCommands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));
         }
-        //add sound on vote receive
+
         if(PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getBoolean("Sound.enabled")) {
             String soundType = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getString("Sound.soundType");
-            if (soundType == null || soundType.equalsIgnoreCase("NONE")) {
-                return;
-            }
-            try {
-                Sound sound = Sound.valueOf(soundType);
-                player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+            assert soundType != null;
+            if (!soundType.isEmpty()) {
+                player.playSound(player.getLocation(), Sound.valueOf(soundType), 1.0f, 1.0f);
+
             }
         }
 
