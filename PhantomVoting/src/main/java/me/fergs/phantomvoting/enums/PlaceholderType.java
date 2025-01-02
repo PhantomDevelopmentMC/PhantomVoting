@@ -69,6 +69,15 @@ public enum PlaceholderType {
         }
     },
     /**
+     * The placeholder type for the player's vote party position.
+     */
+    PLAYER_POSITION("player_position") {
+        @Override
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+            return String.valueOf(voteStorage.getPlayerPosition(player.getUniqueId()));
+        }
+    },
+    /**
      * The placeholder type for the vote party threshold.
      */
     VOTE_PARTY_THRESHOLD("vote_party_threshold") {

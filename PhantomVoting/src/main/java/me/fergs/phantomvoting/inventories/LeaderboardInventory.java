@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LeaderboardInventory<T extends PhantomVoting> implements InventoryInterface {
 
@@ -124,11 +125,28 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
      */
     private ItemStack createPlayerItem(PlayerVoteData playerData) {
         String playerName = getPlayerName(playerData.getUuid());
+        int playerPosition = cachedTopPlayers.indexOf(playerData) + 1;
+        int votes = playerData.getVoteCount();
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
         if (skullMeta != null) {
             skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerData.getUuid()));
-            skullMeta.setDisplayName(Color.hex("&6&l[&e&l!&6&l] &e" + playerName + " &8(&7" + playerData.getVoteCount() + " Votes&8)"));
+
+            String displayName = Color.hex(config.getString("Leaderboard.player-head.name",
+                            "&6&l[&e&l!&6&l] &e%player% &8(&7#%position%&8)")
+                    .replace("%player%", playerName)
+                    .replace("%position%", String.valueOf(playerPosition))
+                    .replace("%votes%", String.valueOf(votes)));
+
+            List<String> lore = config.getStringList("Leaderboard.player-head.lore").stream()
+                    .map(line -> Color.hex(line
+                            .replace("%player%", playerName)
+                            .replace("%position%", String.valueOf(playerPosition))
+                            .replace("%votes%", String.valueOf(votes))))
+                    .collect(Collectors.toList());
+
+            skullMeta.setDisplayName(displayName);
+            skullMeta.setLore(lore);
             item.setItemMeta(skullMeta);
         }
         return item;

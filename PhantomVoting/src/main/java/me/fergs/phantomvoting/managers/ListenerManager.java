@@ -54,23 +54,6 @@ public class ListenerManager<T extends Plugin> {
         }
     }
     /**
-     * Checks if a listener class is registered.
-     *
-     * @param listenerClass the listener class to check
-     * @return true if the listener is registered, false otherwise
-     */
-    public boolean isListenerRegistered(Class<? extends Listener> listenerClass) {
-        return registeredListeners.contains(listenerClass);
-    }
-    /**
-     * Gets all registered listener classes.
-     *
-     * @return a set of all registered listener classes
-     */
-    public Set<Class<? extends Listener>> getRegisteredListeners() {
-        return new HashSet<>(registeredListeners);
-    }
-    /**
      * Retrieves the plugin instance used for listener registration.
      *
      * @return the plugin instance

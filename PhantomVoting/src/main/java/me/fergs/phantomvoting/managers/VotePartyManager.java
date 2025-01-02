@@ -88,4 +88,37 @@ public class VotePartyManager {
     public void reloadThreshold() {
         this.voteThreshold = plugin.getConfigurationManager().getConfig("voteparty").getInt("Settings.Required", 100);
     }
+    /**
+     * Forces a vote party to trigger.
+     *
+     * @param resetVotes Whether to reset the vote count after triggering.
+     */
+    public void forceVoteParty(boolean resetVotes) {
+        if (resetVotes) {
+            resetVoteCount();
+        }
+        triggerVoteParty();
+    }
+    /**
+     * Forces the vote count to a specific amount.
+     *
+     * @param amount The amount to set the vote count to.
+     */
+    public void forceAddAmount(int amount) {
+        currentVoteCount += amount;
+        voteStorage.setCurrentGlobalVoteCount(currentVoteCount);
+    }
+    /**
+     * Sets the current vote count.
+     *
+     * @param currentVoteCount The current vote count.
+     */
+    public void setCurrentVoteCount(int currentVoteCount) {
+        this.currentVoteCount = currentVoteCount;
+        if (currentVoteCount >= voteThreshold) {
+            triggerVoteParty();
+            currentVoteCount -= voteThreshold;
+        }
+        voteStorage.setCurrentGlobalVoteCount(currentVoteCount);
+    }
 }

@@ -37,12 +37,11 @@ public class VoteReceiveListener implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));
         }
 
-        if(PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getBoolean("Sound.enabled")) {
+        if (PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getBoolean("Sound.enabled")) {
             String soundType = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getString("Sound.soundType");
             assert soundType != null;
             if (!soundType.isEmpty()) {
-                player.playSound(player.getLocation(), Sound.valueOf(soundType), 1.0f, 1.0f);
-
+                player.playSound(player, Sound.valueOf(soundType), 1.0f, 1.0f);
             }
         }
 
@@ -51,7 +50,11 @@ public class VoteReceiveListener implements Listener {
             for (String rewardKey : voteRewardsSection.getKeys(false)) {
                 ConfigurationSection rewardSection = voteRewardsSection.getConfigurationSection(rewardKey);
                 assert rewardSection != null;
+                boolean hasPermissionString = rewardSection.contains("Permission");
                 double chance = rewardSection.getDouble("Chance", 100);
+                if (hasPermissionString && !player.hasPermission(rewardSection.getString("Permission", "phantomvoting.default"))) {
+                    continue;
+                }
                 if (Math.random() * 100 <= chance) {
                     List<String> rewardCommands = rewardSection.getStringList("Commands");
                     for (String command : rewardCommands) {

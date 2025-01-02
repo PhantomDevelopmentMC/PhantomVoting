@@ -95,16 +95,7 @@ public final class PhantomVoting extends JavaPlugin {
      */
     public static PhantomVoting getInstance() {
         return instance;
-    }
-    /**
-     * Gets the listener registry.
-     *
-     * @return the listener registry
-     */
-    public ListenerManager<PhantomVoting> getListenerRegistry() {
-        return listenerManager;
-    }
-    /**
+    }/**
      * Gets the configuration manager.
      *
      * @return the configuration manager

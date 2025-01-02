@@ -31,6 +31,7 @@ Rewards:
 
     "Rare":
       Chance: 10                  # 10% chance to receive this rare reward
+      Permission: "phantomvote.rewards.rare" # Permission required to receive this reward
       Commands:
         - "give %player% minecraft:diamond_block 1"
         - "eco give %player% 2000"

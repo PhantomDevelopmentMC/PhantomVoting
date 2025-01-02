@@ -27,6 +27,19 @@ Leaderboard:
       - '&3&l → &bNext Refresh: &f%refresh_time%'
       - '&3&l → &bYour Position: &f#%position%'
     slot: 4
+
+  # This is the item that will be used to display the top voters.
+  player-head:
+    material: "PLAYER_HEAD"
+    name: "&3&l[&b&l!&3&l] &b%player% &8(&7#%position%&8)"
+    lore:
+      - '&8sᴛᴀᴛɪsᴛɪᴄs'
+      - '&7&oSee below for statistics on the player.'
+      - '&7'
+      - '&b&lInformation'
+      - '&3&l → &bPosition: &f#%position%'
+      - '&3&l → &bVotes: &f%votes%'
+
   ## This item will be used if there's not enough voters to fill the leaderboard.
   null-head:
     material: "FIRE_CORAL_BLOCK"

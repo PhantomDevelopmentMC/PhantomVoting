@@ -3,6 +3,7 @@ package me.fergs.phantomvoting.commands;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.BooleanArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 import me.fergs.phantomvoting.PhantomVoting;
@@ -50,7 +51,7 @@ public class AdminCommands {
                         .executes((player, args) -> {
                             Player target = (Player) args.get("player");
                             if (target == null) {
-                                throw new RuntimeException("Player cannot be null.");
+                                throw new IllegalArgumentException("Player not found");
                             }
                             Vote vote;
                             vote = new Vote(
@@ -71,6 +72,29 @@ public class AdminCommands {
                             plugin.getVoteStorage().removeVote(target.getUniqueId(), amount);
                             plugin.getMessageManager().sendMessage(player, "REMOVE_VOTE", "%player%", target.getName());
                         })
+                )
+                .withSubcommand(new CommandAPICommand("voteparty")
+                        .withSubcommand(new CommandAPICommand("forcestart")
+                                .withArguments(new BooleanArgument("reset_vote_progress"))
+                                .executes((player, args) -> {
+                                    boolean resetVoteProgress = (boolean) args.get("reset_vote_progress");
+                                    plugin.getVotePartyManager().forceVoteParty(resetVoteProgress);
+                                })
+                        )
+                        .withSubcommand(new CommandAPICommand("add")
+                                .withArguments(new IntegerArgument("amount"))
+                                .executes((player, args) -> {
+                                    int amount = (int) args.get("amount");
+                                    plugin.getVotePartyManager().forceAddAmount(amount);
+                                })
+                        )
+                        .withSubcommand(new CommandAPICommand("set")
+                                .withArguments(new IntegerArgument("amount"))
+                                .executes((player, args) -> {
+                                    int amount = (int) args.get("amount");
+                                    plugin.getVotePartyManager().setCurrentVoteCount(amount);
+                                })
+                        )
                 )
                 .register();
     }

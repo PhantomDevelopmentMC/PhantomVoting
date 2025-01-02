@@ -78,7 +78,7 @@ public class InventoryClickListener implements Listener {
                             plugin.getMessageManager().sendMessage(player, "MILESTONE_CLAIMED");
                         }
                     } catch (SQLException e) {
-                        Bukkit.getLogger().warning("An error occurred while claiming a milestone.");
+                        Bukkit.getLogger().warning("An error occurred for player " + player.getName() + " while claiming a milestone");
                         e.printStackTrace();
                     }
                 });
