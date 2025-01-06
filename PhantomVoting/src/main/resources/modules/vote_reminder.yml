@@ -11,3 +11,10 @@ Message: |
   &6&l[&e&lTIP&6&l] &7Type &e/vote &7to cast your vote today!
   &r
   &e&m--------------------------------------------
+  
+
+Permission-Settings:
+  # This allows for customization between other plugins, such as pex, luckperms, etc.
+  Toggle-Permission: "phantomvote.reminder.receive"
+  Set-Permission-Command: "lp user %player% permission set phantomvote.reminder.receive true"
+  Remove-Permission-Command: "lp user %player% permission unset phantomvote.reminder.receive"

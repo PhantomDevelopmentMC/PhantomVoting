@@ -49,6 +49,7 @@ public class VoteStorage {
                 "streak_count INTEGER DEFAULT 0," +
                 "last_vote_date TEXT" +
                 ");";
+
         String createVotePartyTableSQL = "CREATE TABLE IF NOT EXISTS vote_party (" +
                 "current_vote_count INTEGER DEFAULT 0);";
 
@@ -67,7 +68,10 @@ public class VoteStorage {
 
         checkAndAddColumns();
     }
-
+    /**
+     * Checks if the necessary columns exist in the database and adds them if they
+     * are missing.
+     */
     public void checkAndAddColumns() {
         try {
             String addStreakCountColumnQuery = "ALTER TABLE player_votes ADD COLUMN streak_count INTEGER DEFAULT 0";

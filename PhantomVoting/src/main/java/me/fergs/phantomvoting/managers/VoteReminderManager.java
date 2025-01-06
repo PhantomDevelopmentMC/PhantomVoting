@@ -33,10 +33,12 @@ public class VoteReminderManager<T extends PhantomVoting> {
         if (currentTask != null) {
             currentTask.cancel();
         }
+
         String message = plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Message");
         long interval = plugin.getConfigurationManager().getConfig("modules/vote_reminder").getLong("Interval", 3600);
+        String permission = plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Toggle-Permission", "phantomvoting.votereminder");
 
-        VoteReminderTask newTask = new VoteReminderTask(message);
+        VoteReminderTask newTask = new VoteReminderTask(message, permission);
         newTask.runTaskTimerAsynchronously(plugin, 0, 20 * interval);
 
         tasks.put(key, newTask);

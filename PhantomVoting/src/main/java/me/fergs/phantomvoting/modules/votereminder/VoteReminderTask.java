@@ -10,13 +10,15 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class VoteReminderTask extends BukkitRunnable {
     private final String message;
+    private final String permission;
     /**
      * Initializes the VoteReminderTask with the plugin, message, and interval.
      *
      * @param message The message to broadcast.
      */
-    public VoteReminderTask(String message) {
+    public VoteReminderTask(String message, String permission) {
         this.message = message;
+        this.permission = permission;
     }
     /**
      * The task logic that will be executed on each run.
@@ -25,6 +27,9 @@ public class VoteReminderTask extends BukkitRunnable {
     public void run() {
         String[] lines = message.split("\n");
         Bukkit.getOnlinePlayers().forEach(player -> {
+            if (!player.hasPermission(permission)) {
+                return;
+            }
             for (String line : lines) {
                 player.sendMessage(Color.hex(PlaceholderAPI.setPlaceholders(player, line)));
             }

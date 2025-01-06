@@ -31,7 +31,6 @@ Messages:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eSuccessfully added &f1x &6Vote(s) &eto &f%player%&e.'
 
-
   REMOVE_VOTE:
     Sound:
       Enable: true
@@ -71,6 +70,22 @@ Messages:
     Message:
       Enable: true
       Value: '&6&l[&e&l!&6&l] &eYou need &f%required_votes% &evotes to unlock this milestone.'
+
+  MODULE_DISABLED:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&4&l[&c&l!&4&l] &cHey! This is current disabled or undergoing maintenance.'
+
+  VOTE_REMINDER_TOGGLE:
+    Sound:
+      Enable: true
+      Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eVote reminder has been toggled &f%status%&e.'
 
   VOTE_LIST:
     Sound:
