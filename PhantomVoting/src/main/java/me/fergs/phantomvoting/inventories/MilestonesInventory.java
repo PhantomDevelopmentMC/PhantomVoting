@@ -19,6 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class MilestonesInventory<T extends PhantomVoting> implements InventoryInterface {
@@ -154,8 +155,10 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
         String material = section.getString("material", "STONE");
         String name = section.getString("name", "&fDefault");
         List<String> lore = section.getStringList("lore");
+        Optional<String> skullBase64 = Optional.ofNullable(section.getString("base64"));
 
         return ItemBuilder.create(Material.valueOf(material))
+                .setSkullTexture(skullBase64.orElse(null))
                 .setName(name)
                 .setLore(lore)
                 .build();

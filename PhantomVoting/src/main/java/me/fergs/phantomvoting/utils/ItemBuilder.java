@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ItemBuilder {
 
-    private final ItemStack item;
-    private final ItemMeta meta;
+    private ItemStack item;
+    private ItemMeta meta;
 
     private ItemBuilder(Material material) {
         this.item = new ItemStack(material);
@@ -24,6 +24,14 @@ public class ItemBuilder {
     public ItemBuilder setName(String name) {
         if (meta != null && name != null) {
             meta.setDisplayName(Color.hex(name));
+        }
+        return this;
+    }
+
+    public ItemBuilder setSkullTexture(String base64) {
+        if (item.getType() == Material.PLAYER_HEAD && base64 != null) {
+            this.item = SkullUtils.itemFromBase64(base64);
+            this.meta = item.getItemMeta();
         }
         return this;
     }

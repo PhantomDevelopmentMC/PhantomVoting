@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class InventoryUtil {
@@ -58,10 +59,12 @@ public class InventoryUtil {
         Material material = Material.valueOf(config.getString(path + ".material", "STONE"));
         String name = config.getString(path + ".name", "");
         List<String> lore = config.getStringList(path + ".lore");
+        Optional<String> skullBase64 = Optional.ofNullable(config.getString(path + ".base64"));
         name = MessageParser.parseKeyedValues(name, placeholders);
         lore = lore.stream().map(line -> MessageParser.parseKeyedValues(line, placeholders)).collect(Collectors.toList());
 
         return ItemBuilder.create(material)
+                .setSkullTexture(skullBase64.orElse(null))
                 .setName(name)
                 .setLore(lore)
                 .build();

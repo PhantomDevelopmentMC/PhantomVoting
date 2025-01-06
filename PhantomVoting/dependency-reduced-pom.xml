@@ -96,6 +96,12 @@
       <version>9.7.0</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.mojang</groupId>
+      <artifactId>authlib</artifactId>
+      <version>1.5.21</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <properties>
     <java.version>1.8</java.version>
