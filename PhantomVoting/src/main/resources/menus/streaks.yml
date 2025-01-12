@@ -1,0 +1,144 @@
+Streaks:
+  title: "&8&lVote Streaks"
+  size: 54
+  filler:
+    ## Create unlimited amount of fillers. Each filler will be placed in the specified slots.
+    "panels":
+      material: "GRAY_STAINED_GLASS_PANE"
+      name: "&8"
+      lore: [ ]
+      slots:
+        - '5-53'
+  settings:
+    use-delay: false # This is an animation, where each milestone (not filler) will be displayed one by one, causing a sequenced effect.
+    delay-ticks: 10
+  menu:
+    "#1":
+      streak-required: 10
+      slot: 0
+      Available:
+        material: "YELLOW_STAINED_GLASS_PANE"
+        name: "&e&lStreak Reward &6&l#1"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward is available for claiming. Reaching"
+          - "&7&othe required streak will grant you the rewards below:"
+          - " "
+          - "&e&lRewards"
+          - "&6 → &f1x &eVote Trophy"
+          - "&6 → &2$&a500"
+          - " "
+          - "&7&o(( &f&oLeft-Click&7&oto claim this reward ))"
+        commands:
+          - "give %player% minecraft:golden_apple 1"
+          - "eco give %player% 500"
+      Locked:
+        material: "RED_STAINED_GLASS_PANE"
+        name: "&c&lStreak Reward &4&l#1"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward is locked. Increase your"
+          - "&7&ostreak to meet the requirements below."
+          - " "
+          - "&c&lInformation"
+          - "&4 → &cStreak Required: &f10"
+          - " "
+          - "&7&o(( This reward is &c&l&oLocked&7&o ))"
+      Claimed:
+        material: "LIME_STAINED_GLASS_PANE"
+        name: "&a&lStreak Reward &2&l#1"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward has already been claimed."
+          - " "
+          - "&a&lRewards"
+          - "&2 → &f1x &eVote Trophy"
+          - "&2 → &2$&a500"
+          - " "
+          - "&7&o(( This reward has been &a&l&oClaimed&7&o ))"
+    "#2":
+      streak-required: 20
+      slot: 1
+      Available:
+        material: "YELLOW_STAINED_GLASS_PANE"
+        name: "&e&lStreak Reward &6&l#2"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward is available for claiming. Reaching"
+          - "&7&othe required streak will grant you the rewards below:"
+          - " "
+          - "&e&lRewards"
+          - "&6 → &f1x &eVote Trophy"
+          - "&6 → &2$&a1000"
+          - " "
+          - "&7&o(( &f&oLeft-Click&7&oto claim this reward ))"
+        commands:
+          - "give %player% minecraft:golden_apple 1"
+          - "eco give %player% 1000"
+      Locked:
+        material: "RED_STAINED_GLASS_PANE"
+        name: "&c&lStreak Reward &4&l#2"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward is locked. Increase your"
+          - "&7&ostreak to meet the requirements below."
+          - " "
+          - "&c&lInformation"
+          - "&4 → &cStreak Required: &f20"
+          - " "
+          - "&7&o(( This reward is &c&l&oLocked&7&o ))"
+      Claimed:
+        material: "LIME_STAINED_GLASS_PANE"
+        name: "&a&lStreak Reward &2&l#2"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward has already been claimed."
+          - " "
+          - "&a&lRewards"
+          - "&2 → &f1x &eVote Trophy"
+          - "&2 → &2$&a1000"
+          - " "
+          - "&7&o(( This reward has been &a&l&oClaimed&7&o ))"
+    "#3":
+      streak-required: 30
+      slot: 2
+      Available:
+        material: "YELLOW_STAINED_GLASS_PANE"
+        name: "&e&lStreak Reward &6&l#3"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward is available for claiming. Reaching"
+          - "&7&othe required streak will grant you the rewards below:"
+          - " "
+          - "&e&lRewards"
+          - "&6 → &f2x &eVote Trophy"
+          - "&6 → &2$&a2000"
+          - " "
+          - "&7&o(( &f&oLeft-Click&7&oto claim this reward ))"
+        commands:
+          - "give %player% minecraft:golden_apple 2"
+          - "eco give %player% 2000"
+      Locked:
+        material: "RED_STAINED_GLASS_PANE"
+        name: "&c&lStreak Reward &4&l#3"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward is locked. Increase your"
+          - "&7&ostreak to meet the requirements below."
+          - " "
+          - "&c&lInformation"
+          - "&4 → &cStreak Required: &f30"
+          - " "
+          - "&7&o(( This reward is &c&l&oLocked&7&o ))"
+      Claimed:
+        material: "LIME_STAINED_GLASS_PANE"
+        name: "&a&lStreak Reward &2&l#3"
+        lore:
+          - "&8Voting Streak"
+          - "&7&oThis streak reward has already been claimed."
+          - " "
+          - "&a&lRewards"
+          - "&2 → &f2x &eVote Trophy"
+          - "&2 → &2$&a2000"
+          - " "
+          - "&7&o(( This reward has been &a&l&oClaimed&7&o ))"

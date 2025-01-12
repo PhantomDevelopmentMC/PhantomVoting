@@ -47,4 +47,4 @@ Leaderboard:
     lore: []
 
 Settings:
-  leaderboard_refresh: 60 # Time in seconds to refresh the leaderboard
+  leaderboard_refresh: 240 # Time in seconds to refresh the leaderboard

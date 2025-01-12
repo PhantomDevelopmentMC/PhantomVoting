@@ -10,6 +10,8 @@ import me.fergs.phantomvoting.PhantomVoting;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDate;
+
 public class AdminCommands {
     /**
      * Registers the admin commands.
@@ -26,13 +28,16 @@ public class AdminCommands {
                 .withSubcommand(new CommandAPICommand("reload")
                         .executes((player, args) -> {
                             plugin.getConfigurationManager().reloadAllConfigs();
-                            plugin.getVotePartyManager().reloadThreshold();
+                            plugin.getVotePartyManager().reloadSettings();
                             plugin.getLeaderboardInventory().reloadInventory();
                             if (plugin.getConfigurationManager().isModuleEnabled("Milestones")) {
                                 plugin.getMilestonesInventory().reloadInventory();
                             }
                             if (plugin.getConfigurationManager().isModuleEnabled("VoteReminder")) {
                                 plugin.getVoteReminderManager().reloadTask("VoteReminder");
+                            }
+                            if (plugin.getConfigurationManager().isModuleEnabled("Streaks-Menu")) {
+                                plugin.getStreaksInventory().reloadInventory();
                             }
                             plugin.getMessageManager().sendMessage(player, "RELOAD");
                         })
@@ -93,6 +98,38 @@ public class AdminCommands {
                                 .executes((player, args) -> {
                                     int amount = (int) args.get("amount");
                                     plugin.getVotePartyManager().setCurrentVoteCount(amount);
+                                })
+                        )
+                )
+                .withSubcommand(new CommandAPICommand("streaks")
+                        .withSubcommand(new CommandAPICommand("reset")
+                                .withArguments(new PlayerArgument("player"))
+                                .executes((player, args) -> {
+                                    Player target = (Player) args.get("player");
+                                    assert target != null;
+                                    LocalDate today = LocalDate.now();
+                                    plugin.getVoteStorage().resetStreak(target.getUniqueId(), today.toString());
+                                    plugin.getMessageManager().sendMessage(player, "STREAK_RESET", "%player%", target.getName());
+                                })
+                        )
+                        .withSubcommand(new CommandAPICommand("set")
+                                .withArguments(new PlayerArgument("player"), new IntegerArgument("streak"))
+                                .executes((player, args) -> {
+                                    Player target = (Player) args.get("player");
+                                    int streak = (int) args.get("streak");
+                                    assert target != null;
+                                    plugin.getVoteStorage().setVoteStreak(target.getUniqueId(), streak);
+                                    plugin.getMessageManager().sendMessage(player, "STREAK_SET", "%player%", target.getName(), "%streak%", String.valueOf(streak));
+                                })
+                        )
+                        .withSubcommand(new CommandAPICommand("add")
+                                .withArguments(new PlayerArgument("player"), new IntegerArgument("streak"))
+                                .executes((player, args) -> {
+                                    Player target = (Player) args.get("player");
+                                    int streak = (int) args.get("streak");
+                                    assert target != null;
+                                    plugin.getVoteStorage().addStreak(target.getUniqueId(), streak);
+                                    plugin.getMessageManager().sendMessage(player, "STREAK_ADD", "%player%", target.getName(), "%streak%", String.valueOf(streak));
                                 })
                         )
                 )

@@ -1,4 +1,5 @@
 Settings:
+  Enabled: true
   Required: 100
   Commands:
     - "give %player% 64 emerald"

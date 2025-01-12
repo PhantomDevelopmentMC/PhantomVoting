@@ -3,6 +3,7 @@ package me.fergs.phantomvoting.listeners;
 import me.fergs.phantomvoting.PhantomVoting;
 import me.fergs.phantomvoting.inventories.holders.LeaderboardInventoryHolder;
 import me.fergs.phantomvoting.inventories.holders.MilestonesInventoryHolder;
+import me.fergs.phantomvoting.inventories.holders.StreaksInventoryHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -26,10 +27,24 @@ public class InventoryClickListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getView().getTopInventory().getHolder() instanceof LeaderboardInventoryHolder) {
             event.setCancelled(true);
+            return;
         }
 
-        if (!(event.getInventory().getHolder() instanceof MilestonesInventoryHolder)) return;
+        if (event.getInventory().getHolder() instanceof MilestonesInventoryHolder) {
+            handleMilestoneClick(event);
+            return;
+        }
 
+        if (event.getInventory().getHolder() instanceof StreaksInventoryHolder) {
+            handleStreakClick(event);
+        }
+    }
+    /**
+     * Handles clicks in the Milestones inventory.
+     *
+     * @param event The InventoryClickEvent.
+     */
+    private void handleMilestoneClick(InventoryClickEvent event) {
         event.setCancelled(true);
 
         Player player = (Player) event.getWhoClicked();
@@ -79,6 +94,66 @@ public class InventoryClickListener implements Listener {
                         }
                     } catch (SQLException e) {
                         Bukkit.getLogger().warning("An error occurred for player " + player.getName() + " while claiming a milestone");
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    /**
+     * Handles clicks in the Streaks inventory.
+     *
+     * @param event The InventoryClickEvent.
+     */
+    private void handleStreakClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+
+        Player player = (Player) event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
+        if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
+
+        UUID playerUUID = player.getUniqueId();
+        PhantomVoting plugin = PhantomVoting.getInstance();
+
+        ConfigurationSection streakMenuSection = plugin.getConfigurationManager()
+                .getConfig("menus/streaks")
+                .getConfigurationSection("Streaks.menu");
+
+        if (streakMenuSection == null) return;
+
+        int clickedSlot = event.getSlot();
+        if (clickedSlot < 0) return;
+
+        streakMenuSection.getKeys(false).stream()
+                .map(streakMenuSection::getConfigurationSection)
+                .filter(Objects::nonNull)
+                .filter(streakConfig -> streakConfig.getInt("slot", -1) == clickedSlot)
+                .findFirst()
+                .ifPresent(streakConfig -> {
+                    try {
+                        int requiredStreaks = streakConfig.getInt("streak-required");
+                        int playerStreaks = plugin.getVoteStorage().getPlayerStreak(playerUUID);
+                        int streakIndex = Integer.parseInt(streakConfig.getName().substring(1));
+                        boolean isClaimed = plugin.getVoteStorage().isStreakClaimed(playerUUID, streakIndex);
+                        if (isClaimed) {
+                            plugin.getMessageManager().sendMessage(player, "STREAK_ALREADY_CLAIMED");
+                        } else if (playerStreaks < requiredStreaks) {
+                            plugin.getMessageManager().sendMessage(player, "STREAK_NOT_ENOUGH", "%required_streak%", String.valueOf(requiredStreaks));
+                        } else {
+                            streakConfig.getStringList("Available.commands").forEach(command ->
+                                    plugin.getServer().dispatchCommand(
+                                            plugin.getServer().getConsoleSender(),
+                                            command.replace("%player%", player.getName())
+                                    )
+                            );
+
+                            plugin.getVoteStorage().claimStreak(playerUUID, streakIndex);
+
+                            player.openInventory(plugin.getStreaksInventory().createInventory(player));
+
+                            plugin.getMessageManager().sendMessage(player, "STREAK_CLAIMED");
+                        }
+                    } catch (SQLException e) {
+                        Bukkit.getLogger().warning("An error occurred for player " + player.getName() + " while claiming a streak");
                         e.printStackTrace();
                     }
                 });

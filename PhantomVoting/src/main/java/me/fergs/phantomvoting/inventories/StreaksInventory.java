@@ -2,7 +2,7 @@ package me.fergs.phantomvoting.inventories;
 
 import me.fergs.phantomvoting.PhantomVoting;
 import me.fergs.phantomvoting.config.YamlConfigFile;
-import me.fergs.phantomvoting.inventories.holders.MilestonesInventoryHolder;
+import me.fergs.phantomvoting.inventories.holders.StreaksInventoryHolder;
 import me.fergs.phantomvoting.inventories.interfaces.InventoryInterface;
 import me.fergs.phantomvoting.objects.InventoryFiller;
 import me.fergs.phantomvoting.utils.Color;
@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class MilestonesInventory<T extends PhantomVoting> implements InventoryInterface {
-
+public class StreaksInventory<T extends PhantomVoting> implements InventoryInterface {
     private final T plugin;
     private int inventorySize;
     private String inventoryTitle;
@@ -34,7 +33,7 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
      *
      * @param plugin The plugin instance.
      */
-    public MilestonesInventory(T plugin) {
+    public StreaksInventory(T plugin) {
         this.plugin = plugin;
         loadConfig();
     }
@@ -42,9 +41,9 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
      * Loads the configuration.
      */
     private void loadConfig() {
-        config = plugin.getConfigurationManager().getConfig("menus/milestones");
-        this.inventorySize = config.getInt("Milestones.size", 27);
-        this.inventoryTitle = Color.hex(config.getString("Milestones.title", "&8Vote Milestones"));
+        config = plugin.getConfigurationManager().getConfig("menus/streaks");
+        this.inventorySize = config.getInt("Streaks.size", 27);
+        this.inventoryTitle = Color.hex(config.getString("Streaks.title", "&8Vote Streaks"));
 
         loadFillers();
     }
@@ -56,7 +55,7 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
      */
     @Override
     public Inventory createInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(new MilestonesInventoryHolder(inventoryTitle), inventorySize, inventoryTitle);
+        Inventory inventory = Bukkit.createInventory(new StreaksInventoryHolder(inventoryTitle), inventorySize, inventoryTitle);
         UUID playerUUID = player.getUniqueId();
 
         fillers.forEach(filler ->
@@ -65,25 +64,25 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
                 )
         );
 
-        ConfigurationSection menuSection = config.getConfigurationSection("Milestones.menu");
+        ConfigurationSection menuSection = config.getConfigurationSection("Streaks.menu");
         if (menuSection == null) return inventory;
 
-        boolean delayEnabled = config.getBoolean("Milestones.settings.use-delay", false);
-        long delayTicks = config.getLong("Milestones.settings.delay-ticks", 10L);
+        boolean delayEnabled = config.getBoolean("Streaks.settings.use-delay", false);
+        long delayTicks = config.getLong("Streaks.settings.delay-ticks", 10L);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<Runnable> tasks = new ArrayList<>();
             try {
                 for (String key : menuSection.getKeys(false)) {
                     ConfigurationSection milestoneConfig = menuSection.getConfigurationSection(key);
-                    int requiredVotes = milestoneConfig.getInt("required-votes");
-                    int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
-                    boolean isClaimed = plugin.getVoteStorage().isMilestoneClaimed(playerUUID, Integer.parseInt(key.substring(1)));
+                    int requiredStreak = milestoneConfig.getInt("streak-required");
+                    int playerStreak = plugin.getVoteStorage().getPlayerStreak(playerUUID);
+                    boolean isClaimed = plugin.getVoteStorage().isStreakClaimed(playerUUID, Integer.parseInt(key.substring(1)));
 
                     ItemStack item;
                     if (isClaimed) {
                         item = loadItem(milestoneConfig.getConfigurationSection("Claimed"));
-                    } else if (playerVotes >= requiredVotes) {
+                    } else if (playerStreak >= requiredStreak) {
                         item = loadItem(milestoneConfig.getConfigurationSection("Available"));
                     } else {
                         item = loadItem(milestoneConfig.getConfigurationSection("Locked"));
@@ -125,7 +124,7 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
     @Override
     public void loadFillers() {
         fillers = new ArrayList<>();
-        ConfigurationSection fillerSection = config.getConfigurationSection("Milestones.filler");
+        ConfigurationSection fillerSection = config.getConfigurationSection("Streaks.filler");
         if (fillerSection != null) {
             for (String fillerKey : fillerSection.getKeys(false)) {
                 ConfigurationSection fillerConfig = fillerSection.getConfigurationSection(fillerKey);
@@ -164,10 +163,7 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
                 .build();
     }
     /**
-     * Gets the player name from the cache or fetches it from the server.
-     *
-     * @param uuid The player UUID.
-     * @return The player name.
+     * Reloads the inventory.
      */
     @Override
     public void reloadInventory() {

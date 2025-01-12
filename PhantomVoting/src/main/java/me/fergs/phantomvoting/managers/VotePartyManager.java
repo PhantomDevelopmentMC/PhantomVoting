@@ -1,6 +1,7 @@
 package me.fergs.phantomvoting.managers;
 
 import me.fergs.phantomvoting.PhantomVoting;
+import me.fergs.phantomvoting.config.YamlConfigFile;
 import me.fergs.phantomvoting.database.VoteStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -12,6 +13,8 @@ public class VotePartyManager {
     private int currentVoteCount = 0;
     private final VoteStorage voteStorage;
     private final PhantomVoting plugin;
+    private final YamlConfigFile votepartyConfig;
+    private boolean votePartyEnabled;
 
     /**
      * Creates a new VotePartyManager.
@@ -19,9 +22,11 @@ public class VotePartyManager {
      * @param plugin The main plugin instance.
      */
     public VotePartyManager(PhantomVoting plugin) {
-        this.voteThreshold = plugin.getConfigurationManager().getConfig("voteparty").getInt("Settings.Required", 100);
+        this.votepartyConfig = plugin.getConfigurationManager().getConfig("voteparty");
+        this.voteThreshold = votepartyConfig.getInt("Settings.Required", 100);
         this.plugin = plugin;
         this.voteStorage = plugin.getVoteStorage();
+        this.votePartyEnabled = votepartyConfig.getBoolean("Settings.Enabled", true);
         loadVoteCount();
     }
     /**
@@ -35,6 +40,9 @@ public class VotePartyManager {
      * Adds a vote to the count and triggers a vote party if the threshold is met.
      */
     public void addVote() {
+        if (!votePartyEnabled) {
+            return;
+        }
         currentVoteCount++;
         voteStorage.setCurrentGlobalVoteCount(currentVoteCount);
 
@@ -47,6 +55,10 @@ public class VotePartyManager {
      * Triggers the vote party by executing configured commands for all online players.
      */
     private void triggerVoteParty() {
+        if (!votePartyEnabled) {
+            return;
+        }
+
         plugin.getMessageManager().broadcastMessage("VOTE_PARTY_TRIGGERED");
 
         List<String> partyCommands = plugin.getConfigurationManager()
@@ -85,8 +97,9 @@ public class VotePartyManager {
     /**
      * Reloads the vote threshold from the configuration.
      */
-    public void reloadThreshold() {
+    public void reloadSettings() {
         this.voteThreshold = plugin.getConfigurationManager().getConfig("voteparty").getInt("Settings.Required", 100);
+        this.votePartyEnabled = plugin.getConfigurationManager().getConfig("voteparty").getBoolean("Settings.Enabled", true);
     }
     /**
      * Forces a vote party to trigger.

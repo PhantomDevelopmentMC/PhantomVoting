@@ -5,10 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A configuration manager for managing configuration files.
@@ -27,7 +24,7 @@ public class ConfigurationManager<T extends JavaPlugin> {
     /**
      * Cache for enabled modules.
      */
-    private List<Module> enabledModules;
+    private Set<Module> enabledModules;
     /**
      * Creates a new ConfigurationManager instance.
      *
@@ -55,9 +52,9 @@ public class ConfigurationManager<T extends JavaPlugin> {
     /**
      * Loads the modules configuration (modules.yml).
      */
-    public void  loadModules() {
+    public void loadModules() {
         YamlConfigFile modulesConfig = getConfig("modules");
-        enabledModules = new ArrayList<>();
+        enabledModules = new HashSet<>();
         if (modulesConfig != null) {
             ConfigurationSection modulesSection = modulesConfig.getConfigurationSection("Modules");
 
@@ -76,12 +73,19 @@ public class ConfigurationManager<T extends JavaPlugin> {
         }
     }
     /**
+     * Reloads the modules configuration.
+     */
+    public void reloadModules() {
+        enabledModules.clear();
+        loadModules();
+    }
+    /**
      * Gets the list of enabled modules.
      *
      * @return The list of enabled modules.
      */
     public List<Module> getEnabledModules() {
-        return enabledModules != null ? enabledModules : new ArrayList<>();
+        return enabledModules != null ? new ArrayList<>(enabledModules) : new ArrayList<>();
     }
     /**
      * Checks if a module is enabled.

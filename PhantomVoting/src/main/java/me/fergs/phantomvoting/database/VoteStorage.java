@@ -60,10 +60,18 @@ public class VoteStorage {
                 "PRIMARY KEY (uuid, milestone_id)" +
                 ");";
 
+        String createStreaksTableSQL = "CREATE TABLE IF NOT EXISTS player_streaks (" +
+                "uuid TEXT NOT NULL," +
+                "streak_id INTEGER NOT NULL," +
+                "claimed BOOLEAN DEFAULT FALSE," +
+                "PRIMARY KEY (uuid, streak_id)" +
+                ");";
+
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
             stmt.execute(createVotePartyTableSQL);
             stmt.execute(createMilestonesTableSQL);
+            stmt.execute(createStreaksTableSQL);
         }
 
         checkAndAddColumns();
@@ -346,13 +354,29 @@ public class VoteStorage {
         }
     }
     /**
+     * Sets the vote streak count for the player.
+     *
+     * @param playerUUID UUID of the player
+     * @param streak The streak count to set
+     */
+    public void setVoteStreak(UUID playerUUID, int streak) {
+        String updateSQL = "UPDATE player_votes SET streak_count = ? WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
+            pstmt.setInt(1, streak);
+            pstmt.setString(2, playerUUID.toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
      * Increments the streak count for the player and updates the last vote date.
      *
      * @param playerUUID UUID of the player
      * @param newStreakCount New streak count to set
      * @param currentTimestamp The current date as a timestamp
      */
-    private void incrementStreak(UUID playerUUID, int newStreakCount, String currentTimestamp) {
+    public void incrementStreak(UUID playerUUID, int newStreakCount, String currentTimestamp) {
         String updateSQL = "UPDATE player_votes SET streak_count = ?, last_vote_date = ? WHERE uuid = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
             pstmt.setInt(1, newStreakCount);
@@ -364,12 +388,28 @@ public class VoteStorage {
         }
     }
     /**
+     * Adds to the player's current streak count.
+     *
+     * @param playerUUID UUID of the player
+     * @param streak The streak count to add
+     */
+    public void addStreak(UUID playerUUID, int streak) {
+        String updateSQL = "UPDATE player_votes SET streak_count = streak_count + ? WHERE uuid = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
+            pstmt.setInt(1, streak);
+            pstmt.setString(2, playerUUID.toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
      * Resets the player's streak count and updates the last vote date.
      *
      * @param playerUUID UUID of the player
      * @param currentTimestamp The current date as a timestamp
      */
-    private void resetStreak(UUID playerUUID, String currentTimestamp) {
+    public void resetStreak(UUID playerUUID, String currentTimestamp) {
         String updateSQL = "UPDATE player_votes SET streak_count = 1, last_vote_date = ? WHERE uuid = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
             pstmt.setString(1, currentTimestamp);
@@ -443,6 +483,38 @@ public class VoteStorage {
             ps.setString(1, uuid.toString());
             ps.setInt(2, milestoneId);
             ps.executeUpdate();
+        }
+    }
+    /**
+     * Adds a streak claim for the specified player.
+     *
+     * @param uuid UUID of the player
+     * @param streakId ID of the streak
+     */
+    public void claimStreak(UUID uuid, int streakId) throws SQLException {
+        String query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
+                "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, streakId);
+            ps.executeUpdate();
+        }
+    }
+    /**
+     * Checks if a streak has been claimed by the player.
+     *
+     * @param uuid UUID of the player
+     * @param streakId ID of the streak
+     * @return True if the streak has been claimed, false otherwise
+     */
+    public boolean isStreakClaimed(UUID uuid, int streakId) throws SQLException {
+        String query = "SELECT claimed FROM player_streaks WHERE uuid = ? AND streak_id = ?;";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, streakId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean("claimed");
+            }
         }
     }
     /**

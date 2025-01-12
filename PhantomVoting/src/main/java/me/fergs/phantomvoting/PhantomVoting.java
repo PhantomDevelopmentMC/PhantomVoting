@@ -8,6 +8,7 @@ import me.fergs.phantomvoting.config.ConfigurationManager;
 import me.fergs.phantomvoting.database.VoteStorage;
 import me.fergs.phantomvoting.inventories.LeaderboardInventory;
 import me.fergs.phantomvoting.inventories.MilestonesInventory;
+import me.fergs.phantomvoting.inventories.StreaksInventory;
 import me.fergs.phantomvoting.listeners.InventoryClickListener;
 import me.fergs.phantomvoting.listeners.VoteReceiveListener;
 import me.fergs.phantomvoting.listeners.modules.BossbarEventsListener;
@@ -27,6 +28,7 @@ public final class PhantomVoting extends JavaPlugin {
     private LeaderboardInventory<PhantomVoting> leaderboardInventory;
     private VoteReminderManager<PhantomVoting> voteReminderManager;
     private MilestonesInventory<PhantomVoting> milestonesInventory;
+    private StreaksInventory<PhantomVoting> streaksInventory;
     /**
      * Called when the plugin is loaded.
      * This is where we register the Command API if it is not already loaded.
@@ -55,6 +57,7 @@ public final class PhantomVoting extends JavaPlugin {
                 "modules/bossbar",
                 "modules/vote_reminder",
                 "menus/leaderboard",
+                "menus/streaks",
                 "menus/milestones");
 
         configurationManager.loadModules();
@@ -77,6 +80,10 @@ public final class PhantomVoting extends JavaPlugin {
         }
         if (configurationManager.isModuleEnabled("Milestones")) {
             milestonesInventory = new MilestonesInventory<>(this);
+        }
+
+        if (configurationManager.isModuleEnabled("Streaks-Menu")) {
+            streaksInventory = new StreaksInventory<>(this);
         }
 
         new Metrics(this, 23888);
@@ -158,5 +165,13 @@ public final class PhantomVoting extends JavaPlugin {
      */
     public MilestonesInventory<PhantomVoting> getMilestonesInventory() {
         return milestonesInventory;
+    }
+    /**
+     * Gets the streaks inventory.
+     *
+     * @return the streaks inventory
+     */
+    public StreaksInventory<PhantomVoting> getStreaksInventory() {
+        return streaksInventory;
     }
 }

@@ -1,7 +1,10 @@
+# Any modules that are disabled will not be loaded by the plugin. Requires a server restart to take effect.
 Modules:
   Bossbar:
     Enabled: false
   VoteReminder:
     Enabled: true
   Milestones:
+    Enabled: false
+  Streaks-Menu:
     Enabled: false

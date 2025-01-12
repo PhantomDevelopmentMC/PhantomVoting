@@ -77,7 +77,7 @@ Messages:
       Value: ENTITY_BAT_TAKEOFF;1.0;1.0
     Message:
       Enable: true
-      Value: '&4&l[&c&l!&4&l] &cHey! This is current disabled or undergoing maintenance.'
+      Value: '&4&l[&c&l!&4&l] &cHey! This is currently disabled or undergoing maintenance.'
 
   VOTE_REMINDER_TOGGLE:
     Sound:
@@ -85,7 +85,47 @@ Messages:
       Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
     Message:
       Enable: true
-      Value: '&6&l[&e&l!&6&l] &eVote reminder has been toggled &f%status%&e.'
+      Value: '&6&l[&e&l!&6&l] &eVote reminder has been &f%status%&e.'
+
+  STREAK_ALREADY_CLAIMED:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou have already claimed this streak reward.'
+
+  STREAK_NOT_ENOUGH:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou need a streak of &f%required_streak% &eto unlock this reward.'
+
+  STREAK_RESET:
+    Sound:
+      Enable: true
+      Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou have reset &f%player%&e''s voting streak.'
+
+  STREAK_SET:
+    Sound:
+      Enable: true
+      Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou have set &f%player%&e''s voting streak to &f%streak%&e.'
+
+  STREAK_ADD:
+    Sound:
+      Enable: true
+      Value: ENTITY_PLAYER_LEVELUP;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&6&l[&e&l!&6&l] &eYou have added &f%streak% &eto &f%player%&e''s voting streak.'
 
   VOTE_LIST:
     Sound:
