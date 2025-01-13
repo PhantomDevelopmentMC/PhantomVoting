@@ -73,11 +73,11 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<Runnable> tasks = new ArrayList<>();
+            int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
             try {
                 for (String key : menuSection.getKeys(false)) {
                     ConfigurationSection milestoneConfig = menuSection.getConfigurationSection(key);
                     int requiredVotes = milestoneConfig.getInt("required-votes");
-                    int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
                     boolean isClaimed = plugin.getVoteStorage().isMilestoneClaimed(playerUUID, Integer.parseInt(key.substring(1)));
 
                     ItemStack item;
@@ -132,12 +132,18 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
                 assert fillerConfig != null;
                 String material = fillerConfig.getString("material", "GRAY_STAINED_GLASS_PANE");
                 String name = fillerConfig.getString("name", "&8");
+                int customModelData = fillerConfig.getInt("custom-model-data", 0);
+                int stackAmount = fillerConfig.getInt("item-amount", 1);
+                boolean isGlowing = fillerConfig.getBoolean("glowing", false);
                 List<String> lore = fillerConfig.getStringList("lore");
                 List<String> slotRanges = fillerConfig.getStringList("slots");
 
                 ItemStack fillerItem = ItemBuilder.create(Material.valueOf(material))
                         .setName(name)
                         .setLore(lore)
+                        .setCustomModelData(customModelData)
+                        .setItemAmount(stackAmount)
+                        .setGlowing(isGlowing)
                         .build();
 
                 List<List<Integer>> slots = InventoryUtil.parseSlotRanges(slotRanges);
@@ -155,19 +161,24 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
         String material = section.getString("material", "STONE");
         String name = section.getString("name", "&fDefault");
         List<String> lore = section.getStringList("lore");
+        int customModelData = section.getInt("custom-model-data", 0);
+        int stackAmount = section.getInt("item-amount", 1);
+        boolean isGlowing = section.getBoolean("glowing", false);
+        Optional<List<String>> itemFlagsOptional = Optional.of(section.getStringList("flags"));
         Optional<String> skullBase64 = Optional.ofNullable(section.getString("base64"));
 
         return ItemBuilder.create(Material.valueOf(material))
                 .setSkullTexture(skullBase64.orElse(null))
                 .setName(name)
                 .setLore(lore)
+                .setCustomModelData(customModelData)
+                .setItemAmount(stackAmount)
+                .setGlowing(isGlowing)
+                .addItemFlags(itemFlagsOptional.orElse(null))
                 .build();
     }
     /**
-     * Gets the player name from the cache or fetches it from the server.
-     *
-     * @param uuid The player UUID.
-     * @return The player name.
+     * Reloads the inventory.
      */
     @Override
     public void reloadInventory() {

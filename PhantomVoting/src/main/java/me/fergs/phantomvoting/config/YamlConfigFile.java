@@ -5,7 +5,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * A configuration file that uses the YAML format.
@@ -41,16 +40,6 @@ public class YamlConfigFile extends YamlConfiguration {
         }
     }
     /**
-     * Saves the configuration file.
-     */
-    public void save() {
-        try {
-            super.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    /**
      * Gets a configuration section from the configuration file.
      *
      * @param path The path to the section.
@@ -59,13 +48,5 @@ public class YamlConfigFile extends YamlConfiguration {
     @Override
     public ConfigurationSection getConfigurationSection(@NotNull String path) {
         return super.getConfigurationSection(path);
-    }
-    /**
-     * Gets a string from the configuration file.
-     *
-     * @return The string.
-     */
-    public File getFile() {
-        return file;
     }
 }

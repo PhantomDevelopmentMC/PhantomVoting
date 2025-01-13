@@ -10,6 +10,7 @@ import me.fergs.phantomvoting.inventories.LeaderboardInventory;
 import me.fergs.phantomvoting.inventories.MilestonesInventory;
 import me.fergs.phantomvoting.inventories.StreaksInventory;
 import me.fergs.phantomvoting.listeners.InventoryClickListener;
+import me.fergs.phantomvoting.listeners.PlayerListener;
 import me.fergs.phantomvoting.listeners.VoteReceiveListener;
 import me.fergs.phantomvoting.listeners.modules.BossbarEventsListener;
 import me.fergs.phantomvoting.managers.*;
@@ -22,9 +23,10 @@ public final class PhantomVoting extends JavaPlugin {
     private ListenerManager<PhantomVoting> listenerManager;
     private ConfigurationManager<PhantomVoting> configurationManager;
     private VoteStorage voteStorage;
-    private MessageManager messageManager;
+    private MessageManager<PhantomVoting> messageManager;
     private VotePartyManager votePartyManager;
     private BossbarManager<PhantomVoting> bossbarManager;
+    private PlayerManager<PhantomVoting> playerManager;
     private LeaderboardInventory<PhantomVoting> leaderboardInventory;
     private VoteReminderManager<PhantomVoting> voteReminderManager;
     private MilestonesInventory<PhantomVoting> milestonesInventory;
@@ -46,7 +48,8 @@ public final class PhantomVoting extends JavaPlugin {
         listenerManager.registerListeners(
                 VoteReceiveListener.class,
                 BossbarEventsListener.class,
-                InventoryClickListener.class
+                InventoryClickListener.class,
+                PlayerListener.class
         );
         configurationManager = new ConfigurationManager<>(this);
         configurationManager.loadConfigs(
@@ -61,10 +64,11 @@ public final class PhantomVoting extends JavaPlugin {
                 "menus/milestones");
 
         configurationManager.loadModules();
-        messageManager = new MessageManager(configurationManager);
+        messageManager = new MessageManager<>(this, configurationManager);
         voteStorage = new VoteStorage("PhantomVoting");
         votePartyManager = new VotePartyManager(this);
         leaderboardInventory = new LeaderboardInventory<>(this);
+        playerManager = new PlayerManager<>(this);
 
         new PlaceholderManager(voteStorage, votePartyManager).register();
 
@@ -115,7 +119,7 @@ public final class PhantomVoting extends JavaPlugin {
      *
      * @return the message manager
      */
-    public MessageManager getMessageManager() {
+    public MessageManager<PhantomVoting> getMessageManager() {
         return messageManager;
     }
     /**
@@ -133,6 +137,22 @@ public final class PhantomVoting extends JavaPlugin {
      */
     public VotePartyManager getVotePartyManager() {
         return votePartyManager;
+    }
+    /**
+     * Gets the listener manager.
+     *
+     * @return the listener manager
+     */
+    public ListenerManager<PhantomVoting> getListenerManager() {
+        return listenerManager;
+    }
+    /**
+     * Gets the player manager.
+     *
+     * @return the player manager
+     */
+    public PlayerManager<PhantomVoting> getPlayerManager() {
+        return playerManager;
     }
     /**
      * Gets the bossbar manager.

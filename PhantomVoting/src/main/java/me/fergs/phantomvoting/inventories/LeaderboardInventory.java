@@ -30,7 +30,7 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
     private long lastRefreshTime;
     private int inventorySize;
     private String inventoryTitle;
-    private List<String> playerSlots = new ArrayList<>();
+    private Set<String> playerSlots = new HashSet<>();
     private List<InventoryFiller> fillers = new ArrayList<>();
     private ItemStack nullHeadItem;
     private YamlConfigFile config;
@@ -52,7 +52,7 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
      */
     private void loadConfig() {
         config = plugin.getConfigurationManager().getConfig("menus/leaderboard");
-        this.playerSlots = config.getStringList("Leaderboard.player-slots");
+        this.playerSlots = new HashSet<>(config.getStringList("Leaderboard.player-slots"));
         this.inventorySize = config.getInt("Leaderboard.size", 27);
         this.inventoryTitle = Color.hex(config.getString("Leaderboard.title", "&8Vote Top Leaderboard"));
         this.nullHeadItem = InventoryUtil.createItem(config, "Leaderboard.null-head");
@@ -165,12 +165,18 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
                 assert fillerConfig != null;
                 String material = fillerConfig.getString("material", "GRAY_STAINED_GLASS_PANE");
                 String name = fillerConfig.getString("name", "&8");
+                int customModelData = fillerConfig.getInt("custom-model-data", 0);
+                int stackAmount = fillerConfig.getInt("item-amount", 1);
+                boolean isGlowing = fillerConfig.getBoolean("glowing", false);
                 List<String> lore = fillerConfig.getStringList("lore");
                 List<String> slotRanges = fillerConfig.getStringList("slots");
 
                 ItemStack fillerItem = ItemBuilder.create(Material.valueOf(material))
                         .setName(name)
                         .setLore(lore)
+                        .setCustomModelData(customModelData)
+                        .setItemAmount(stackAmount)
+                        .setGlowing(isGlowing)
                         .build();
 
                 List<List<Integer>> slots = InventoryUtil.parseSlotRanges(slotRanges);

@@ -49,21 +49,14 @@ public class PlayerCommands{
                                     }
                                     String permission = plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Toggle-Permission", "phantomvoting.votereminder");
                                     if (!player.hasPermission(permission)) {
-                                        if (plugin.getConfigurationManager().getConfig("modules/vote_reminder").getStringList("Permission-Settings.Set-Permission-Command").isEmpty()) {
-                                            return;
-                                        }
-
-                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Set-Permission-Command")
+                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Set-Permission-Command", "this should be a command")
                                                 .replace("%player%", player.getName()));
 
                                         plugin.getMessageManager().sendMessage(player, "VOTE_REMINDER_TOGGLE", "%status%", "enabled");
                                     }
                                     else {
-                                        if (plugin.getConfigurationManager().getConfig("modules/vote_reminder").getStringList("Permission-Settings.Remove-Permission-Command").isEmpty()) {
-                                            return;
-                                        }
 
-                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Remove-Permission-Command")
+                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Remove-Permission-Command", "this should be a command")
                                                 .replace("%player%", player.getName()));
 
                                         plugin.getMessageManager().sendMessage(player, "VOTE_REMINDER_TOGGLE", "%status%", "disabled");

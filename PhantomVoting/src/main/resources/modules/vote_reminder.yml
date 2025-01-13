@@ -13,6 +13,8 @@ Message: |
   &e&m--------------------------------------------
   
 
+# This is the options for the /vote toggle reminder command, you MUST have a permission set for this to work.
+# This is a toggle command, so if the player has the permission, they will receive the reminder, if they don't, they won't.
 Permission-Settings:
   # This allows for customization between other plugins, such as pex, luckperms, etc.
   Toggle-Permission: "phantomvote.reminder.receive"

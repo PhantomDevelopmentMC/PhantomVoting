@@ -1,8 +1,8 @@
 package me.fergs.phantomvoting.modules.votereminder;
 
 import me.clip.placeholderapi.PlaceholderAPI;
+import me.fergs.phantomvoting.PhantomVoting;
 import me.fergs.phantomvoting.utils.Color;
-import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -26,7 +26,7 @@ public class VoteReminderTask extends BukkitRunnable {
     @Override
     public void run() {
         String[] lines = message.split("\n");
-        Bukkit.getOnlinePlayers().forEach(player -> {
+        PhantomVoting.getInstance().getPlayerManager().getPlayers().forEach(player -> {
             if (!player.hasPermission(permission)) {
                 return;
             }

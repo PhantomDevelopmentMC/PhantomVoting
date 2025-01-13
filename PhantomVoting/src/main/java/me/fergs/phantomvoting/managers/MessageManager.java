@@ -1,5 +1,6 @@
 package me.fergs.phantomvoting.managers;
 
+import me.fergs.phantomvoting.PhantomVoting;
 import me.fergs.phantomvoting.config.ConfigurationManager;
 import me.fergs.phantomvoting.utils.Color;
 import me.fergs.phantomvoting.utils.MessageParser;
@@ -13,15 +14,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class MessageManager {
+public class MessageManager<T extends PhantomVoting> {
 
     private final ConfigurationManager<?> configurationManager;
+    private final T plugin;
     /**
      * Creates a new MessageManager instance.
      * @param config The configuration file.
      */
-    public MessageManager(ConfigurationManager<?> config) {
+    public MessageManager(T plugin, ConfigurationManager<?> config) {
         this.configurationManager = config;
+        this.plugin = plugin;
     }
     /**
      * Send a message to the player if enabled in the config.
@@ -66,8 +69,17 @@ public class MessageManager {
             });
         }
 
+        if (isTitleEnabled(key)) {
+            Optional<String> title = getTitle(key);
+            Optional<String> subtitle = getSubtitle(key);
+
+            plugin.getPlayerManager().getPlayers().forEach(player -> {
+                title.ifPresent(titleString -> player.sendTitle(Color.hex(MessageParser.parseKeyedValues(titleString, placeholders)), subtitle.map(s -> Color.hex(MessageParser.parse(s, placeholders))).orElse(null)));
+            });
+        }
+
         if (sound.isPresent() && isSoundEnabled(key)) {
-            Bukkit.getServer().getOnlinePlayers().forEach(player -> playSound(player, sound.get()));
+            plugin.getPlayerManager().getPlayers().forEach(player -> playSound(player, sound.get()));
         }
     }
     /**

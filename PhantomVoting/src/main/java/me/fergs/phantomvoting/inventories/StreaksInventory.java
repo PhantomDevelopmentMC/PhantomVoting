@@ -72,11 +72,11 @@ public class StreaksInventory<T extends PhantomVoting> implements InventoryInter
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<Runnable> tasks = new ArrayList<>();
+            int playerStreak = plugin.getVoteStorage().getPlayerStreak(playerUUID);
             try {
                 for (String key : menuSection.getKeys(false)) {
                     ConfigurationSection milestoneConfig = menuSection.getConfigurationSection(key);
                     int requiredStreak = milestoneConfig.getInt("streak-required");
-                    int playerStreak = plugin.getVoteStorage().getPlayerStreak(playerUUID);
                     boolean isClaimed = plugin.getVoteStorage().isStreakClaimed(playerUUID, Integer.parseInt(key.substring(1)));
 
                     ItemStack item;
@@ -131,12 +131,18 @@ public class StreaksInventory<T extends PhantomVoting> implements InventoryInter
                 assert fillerConfig != null;
                 String material = fillerConfig.getString("material", "GRAY_STAINED_GLASS_PANE");
                 String name = fillerConfig.getString("name", "&8");
+                int customModelData = fillerConfig.getInt("custom-model-data", 0);
+                int stackAmount = fillerConfig.getInt("item-amount", 1);
+                boolean isGlowing = fillerConfig.getBoolean("glowing", false);
                 List<String> lore = fillerConfig.getStringList("lore");
                 List<String> slotRanges = fillerConfig.getStringList("slots");
 
                 ItemStack fillerItem = ItemBuilder.create(Material.valueOf(material))
                         .setName(name)
                         .setLore(lore)
+                        .setCustomModelData(customModelData)
+                        .setItemAmount(stackAmount)
+                        .setGlowing(isGlowing)
                         .build();
 
                 List<List<Integer>> slots = InventoryUtil.parseSlotRanges(slotRanges);
@@ -154,12 +160,20 @@ public class StreaksInventory<T extends PhantomVoting> implements InventoryInter
         String material = section.getString("material", "STONE");
         String name = section.getString("name", "&fDefault");
         List<String> lore = section.getStringList("lore");
+        int customModelData = section.getInt("custom-model-data", 0);
+        int stackAmount = section.getInt("item-amount", 1);
+        boolean isGlowing = section.getBoolean("glowing", false);
+        Optional<List<String>> itemFlagsOptional = Optional.of(section.getStringList("flags"));
         Optional<String> skullBase64 = Optional.ofNullable(section.getString("base64"));
 
         return ItemBuilder.create(Material.valueOf(material))
                 .setSkullTexture(skullBase64.orElse(null))
                 .setName(name)
                 .setLore(lore)
+                .setCustomModelData(customModelData)
+                .setItemAmount(stackAmount)
+                .setGlowing(isGlowing)
+                .addItemFlags(itemFlagsOptional.orElse(null))
                 .build();
     }
     /**

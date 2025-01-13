@@ -71,23 +71,7 @@ public class ConfigurationManager<T extends JavaPlugin> {
                 plugin.getLogger().warning("Modules section is not properly configured.");
             }
         }
-    }
-    /**
-     * Reloads the modules configuration.
-     */
-    public void reloadModules() {
-        enabledModules.clear();
-        loadModules();
-    }
-    /**
-     * Gets the list of enabled modules.
-     *
-     * @return The list of enabled modules.
-     */
-    public List<Module> getEnabledModules() {
-        return enabledModules != null ? new ArrayList<>(enabledModules) : new ArrayList<>();
-    }
-    /**
+    }/**
      * Checks if a module is enabled.
      *
      * @param moduleName The name of the module to check.
@@ -119,29 +103,10 @@ public class ConfigurationManager<T extends JavaPlugin> {
      * Reloads a configuration file.
      *
      * @param fileName The name of the file to reload.
-     * @return The reloaded configuration file.
      */
-    public YamlConfigFile reloadConfig(String fileName) {
+    public void reloadConfig(String fileName) {
         YamlConfigFile config = loadConfig(fileName);
         config.reload();
-        return config;
-    }
-    /**
-     * Saves a configuration file.
-     *
-     * @param fileName The name of the file to save.
-     */
-    public void saveConfig(String fileName) {
-        YamlConfigFile config = configurationCache.get(fileName);
-        if (config != null) {
-            config.save();
-        }
-    }
-    /**
-     * Saves all configuration files.
-     */
-    public void saveAllConfigs() {
-        configurationCache.values().forEach(YamlConfigFile::save);
     }
     /**
      * Reloads all configuration files.
@@ -150,33 +115,11 @@ public class ConfigurationManager<T extends JavaPlugin> {
         configurationCache.keySet().forEach(this::reloadConfig);
     }
     /**
-     * Removes a configuration file from the cache.
-     *
-     * @param fileName The name of the file to remove.
-     */
-    public void removeConfig(String fileName) {
-        configurationCache.remove(fileName);
-    }
-    /**
-     * Clears the configuration cache.
-     */
-    public void clearCache() {
-        configurationCache.clear();
-    }
-    /**
      * Gets the plugin instance.
      *
      * @return The plugin instance.
      */
     public T getPlugin() {
         return plugin;
-    }
-    /**
-     * Gets the configuration cache.
-     *
-     * @return The configuration cache.
-     */
-    public Map<String, YamlConfigFile> getConfigurationCache() {
-        return configurationCache;
     }
 }

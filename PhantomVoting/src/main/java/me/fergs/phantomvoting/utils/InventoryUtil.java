@@ -59,6 +59,10 @@ public class InventoryUtil {
         Material material = Material.valueOf(config.getString(path + ".material", "STONE"));
         String name = config.getString(path + ".name", "");
         List<String> lore = config.getStringList(path + ".lore");
+        int customModelData = config.getInt(path + ".custom-model-data", 0);
+        int stackAmount = config.getInt(path + ".item-amount", 1);
+        boolean isGlowing = config.getBoolean(path + ".glowing", false);
+        Optional<List<String>> itemFlagsOptional = Optional.of(config.getStringList(path + ".flags"));
         Optional<String> skullBase64 = Optional.ofNullable(config.getString(path + ".base64"));
         name = MessageParser.parseKeyedValues(name, placeholders);
         lore = lore.stream().map(line -> MessageParser.parseKeyedValues(line, placeholders)).collect(Collectors.toList());
@@ -67,6 +71,10 @@ public class InventoryUtil {
                 .setSkullTexture(skullBase64.orElse(null))
                 .setName(name)
                 .setLore(lore)
+                .setCustomModelData(customModelData)
+                .setItemAmount(stackAmount)
+                .setGlowing(isGlowing)
+                .addItemFlags(itemFlagsOptional.orElse(null))
                 .build();
     }
 }
