@@ -3,6 +3,7 @@ package me.fergs.phantomvoting.managers;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.fergs.phantomvoting.database.VoteStorage;
 import me.fergs.phantomvoting.enums.PlaceholderType;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,14 @@ public class PlaceholderManager extends PlaceholderExpansion {
     public PlaceholderManager(VoteStorage voteStorage, VotePartyManager votePartyManager) {
         this.voteStorage = voteStorage;
         this.votePartyManager = votePartyManager;
+    }
+
+    @Override
+    public boolean register() {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            return super.register();
+        }
+        return false;
     }
 
     @Override
