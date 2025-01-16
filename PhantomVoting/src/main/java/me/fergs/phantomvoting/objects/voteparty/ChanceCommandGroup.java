@@ -8,7 +8,12 @@ import java.util.Set;
 public class ChanceCommandGroup {
     private final double chance;
     private final ImmutableSet<String> commands;
-
+    /**
+     * Creates a new chance command group.
+     *
+     * @param chance   The chance of the commands executing (0-100).
+     * @param commands The commands associated with this chance group.
+     */
     public ChanceCommandGroup(double chance, Set<String> commands) {
         if (chance < 0.0 || chance > 100.0) {
             Bukkit.getLogger().warning("Chance must be between 0 and 100.");

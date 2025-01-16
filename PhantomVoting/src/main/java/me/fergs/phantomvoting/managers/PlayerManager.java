@@ -9,7 +9,6 @@ import java.util.Set;
 public class PlayerManager<T extends PhantomVoting> {
     private final T plugin;
     private final Set<Player> players = new HashSet<>();
-
     /**
      * Constructs a PlayerManager for managing players.
      *

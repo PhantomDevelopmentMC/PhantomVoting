@@ -63,7 +63,6 @@ public class ConfigurationManager<T extends JavaPlugin> {
                     boolean isEnabled = modulesSection.getBoolean(moduleName + ".Enabled", false);
                     Module module = new Module(moduleName, isEnabled);
                     if (module.isEnabled()) {
-                        plugin.getLogger().info("Enabling module: " + moduleName);
                         enabledModules.add(module);
                     }
                 }
