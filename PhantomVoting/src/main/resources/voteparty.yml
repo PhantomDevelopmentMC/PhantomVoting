@@ -1,13 +1,18 @@
 Settings:
   Enabled: true
   Required: 100
+  # These commands are run when the vote party is triggered, they will always run.
   Commands:
     - "give %player% emerald 64"
+
+  # Chance-Commands are commands that have a chance to run when the vote party is triggered.
   Chance-Commands:
     "Common":
       Chance: 50
       Commands:
         - "give %player% iron_block 64"
+
+  # Permission-Commands are run against the player if they have the required permission node, if they do have the permission node, the commands will run.
   Permission-Commands:
     "Rare":
       Permission: "phantomvote.rewards.rare"
