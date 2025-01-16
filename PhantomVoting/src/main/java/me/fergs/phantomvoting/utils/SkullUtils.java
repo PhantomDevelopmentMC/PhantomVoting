@@ -70,13 +70,27 @@ public class SkullUtils {
     }
 
     /**
-     * Determines if the server is running a modern Minecraft version (1.21+).
+     * Determines if the server is running Minecraft version 1.20.5 or higher.
      *
-     * @return True if the server is modern, false otherwise.
+     * @return True if the server is modern (1.20.5+), false otherwise.
      */
     private static boolean isModernVersion() {
         String version = Bukkit.getBukkitVersion();
-        return version.startsWith("1.21") || version.compareTo("1.21") > 0;
+        String[] versionParts = version.split("-")[0].split("\\.");
+
+        try {
+            int major = Integer.parseInt(versionParts[0]);
+            int minor = Integer.parseInt(versionParts[1]);
+            int patch = versionParts.length > 2 ? Integer.parseInt(versionParts[2]) : 0;
+
+            if (major > 1 || (major == 1 && (minor > 20 || (minor == 20 && patch >= 5)))) {
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            Bukkit.getLogger().warning("Failed to parse Bukkit version: " + version);
+        }
+
+        return false;
     }
 
     /**
