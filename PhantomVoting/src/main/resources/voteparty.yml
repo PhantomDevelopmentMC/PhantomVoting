@@ -2,4 +2,14 @@ Settings:
   Enabled: true
   Required: 100
   Commands:
-    - "give %player% 64 emerald"
+    - "give %player% emerald 64"
+  Chance-Commands:
+    "Common":
+      Chance: 50
+      Commands:
+        - "give %player% iron_block 64"
+  Permission-Commands:
+    "Rare":
+      Permission: "phantomvote.rewards.rare"
+      Commands:
+        - "give %player% netherite_block 64"
