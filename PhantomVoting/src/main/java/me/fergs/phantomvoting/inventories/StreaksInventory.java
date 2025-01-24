@@ -81,11 +81,11 @@ public class StreaksInventory<T extends PhantomVoting> implements InventoryInter
 
                     ItemStack item;
                     if (isClaimed) {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Claimed"));
+                        item = loadItem(milestoneConfig.getConfigurationSection("Claimed"), requiredStreak);
                     } else if (playerStreak >= requiredStreak) {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Available"));
+                        item = loadItem(milestoneConfig.getConfigurationSection("Available"), requiredStreak);
                     } else {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Locked"));
+                        item = loadItem(milestoneConfig.getConfigurationSection("Locked"), requiredStreak);
                     }
 
                     int slot = milestoneConfig.getInt("slot", -1);
@@ -156,7 +156,7 @@ public class StreaksInventory<T extends PhantomVoting> implements InventoryInter
      * @param section The configuration section.
      * @return The item.
      */
-    private ItemStack loadItem(ConfigurationSection section) {
+    private ItemStack loadItem(ConfigurationSection section, int requiredStreak) {
         String material = section.getString("material", "STONE");
         String name = section.getString("name", "&fDefault");
         List<String> lore = section.getStringList("lore");
@@ -165,6 +165,8 @@ public class StreaksInventory<T extends PhantomVoting> implements InventoryInter
         boolean isGlowing = section.getBoolean("glowing", false);
         Optional<List<String>> itemFlagsOptional = Optional.of(section.getStringList("flags"));
         Optional<String> skullBase64 = Optional.ofNullable(section.getString("base64"));
+
+        lore.replaceAll(line -> line.replace("%required_streak%", String.valueOf(requiredStreak)));
 
         return ItemBuilder.create(Material.valueOf(material))
                 .setSkullTexture(skullBase64.orElse(null))

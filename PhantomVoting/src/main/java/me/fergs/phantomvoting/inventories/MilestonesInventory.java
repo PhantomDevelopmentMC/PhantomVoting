@@ -82,11 +82,11 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
 
                     ItemStack item;
                     if (isClaimed) {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Claimed"));
+                        item = loadItem(milestoneConfig.getConfigurationSection("Claimed"), requiredVotes);
                     } else if (playerVotes >= requiredVotes) {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Available"));
+                        item = loadItem(milestoneConfig.getConfigurationSection("Available"), requiredVotes);
                     } else {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Locked"));
+                        item = loadItem(milestoneConfig.getConfigurationSection("Locked"), requiredVotes);
                     }
 
                     int slot = milestoneConfig.getInt("slot", -1);
@@ -157,7 +157,7 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
      * @param section The configuration section.
      * @return The item.
      */
-    private ItemStack loadItem(ConfigurationSection section) {
+    private ItemStack loadItem(ConfigurationSection section, int requiredVotes) {
         String material = section.getString("material", "STONE");
         String name = section.getString("name", "&fDefault");
         List<String> lore = section.getStringList("lore");
@@ -166,6 +166,8 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
         boolean isGlowing = section.getBoolean("glowing", false);
         Optional<List<String>> itemFlagsOptional = Optional.of(section.getStringList("flags"));
         Optional<String> skullBase64 = Optional.ofNullable(section.getString("base64"));
+
+        lore.replaceAll(line -> line.replace("%votes_required%", String.valueOf(requiredVotes)));
 
         return ItemBuilder.create(Material.valueOf(material))
                 .setSkullTexture(skullBase64.orElse(null))
