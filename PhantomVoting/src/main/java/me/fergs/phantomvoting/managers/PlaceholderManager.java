@@ -44,6 +44,14 @@ public class PlaceholderManager extends PlaceholderExpansion {
     public @NotNull String getVersion() {
         return "1.0";
     }
+
+    // PlaceholderAPI will check if the placeholder is persistable.
+    // Needed to avoid placeholder being lost on /papi reload.
+    @Override
+    public boolean persist() {
+        return true;
+    }
+
     /**
      * Gets the value of the placeholder.
      *
