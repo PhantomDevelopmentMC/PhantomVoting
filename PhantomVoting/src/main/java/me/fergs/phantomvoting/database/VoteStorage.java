@@ -1,16 +1,25 @@
 package me.fergs.phantomvoting.database;
 
 import me.fergs.phantomvoting.objects.PlayerVoteData;
+import me.fergs.phantomvoting.utils.ConsoleUtil;
+import org.bukkit.Bukkit;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class VoteStorage {
     private Connection connection;
+    private final TreeSet<PlayerVoteData> cachedTopPlayers = new TreeSet<>(
+            Comparator.comparingInt(PlayerVoteData::getVoteCount).reversed()
+                    .thenComparing(PlayerVoteData::getUuid)
+    );
+    private final Map<UUID, Set<Integer>> milestoneCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<Integer>> streakCache = new ConcurrentHashMap<>();
     /**
      * Creates a new VoteStorage instance.
      *
@@ -20,6 +29,7 @@ public class VoteStorage {
         try {
             connectDatabase(dataFolder);
             initializeDatabase();
+            Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eConnected to &fSQLite &edatabase."));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -270,6 +280,7 @@ public class VoteStorage {
         String querySQL = "SELECT uuid, all_time_count FROM player_votes ORDER BY all_time_count DESC LIMIT 10";
         List<PlayerVoteData> topPlayers = new ArrayList<>();
 
+        cachedTopPlayers.clear();
         try (PreparedStatement pstmt = connection.prepareStatement(querySQL)) {
             ResultSet rs = pstmt.executeQuery();
 
@@ -283,8 +294,43 @@ public class VoteStorage {
             e.printStackTrace();
         }
 
+        updateTopPlayers(topPlayers);
         return topPlayers;
     }
+    /**
+     * Updates the cached top players list.
+     * @param newTopPlayers The new top players list
+     */
+    private void updateTopPlayers(List<PlayerVoteData> newTopPlayers) {
+        cachedTopPlayers.clear();
+        cachedTopPlayers.addAll(
+                newTopPlayers.stream()
+                        .sorted(Comparator.comparingInt(PlayerVoteData::getVoteCount).reversed()
+                                .thenComparing(PlayerVoteData::getUuid))
+                        .limit(10)
+                        .collect(Collectors.toList())
+        );
+    }
+    /**
+     * Gets the PlayerVoteData at the specified position (1-based index).
+     *
+     * @param position The position (1-based index).
+     * @return The PlayerVoteData at the position, or null if out of bounds.
+     */
+    public PlayerVoteData getTopPlayerAt(int position) {
+        if (position <= 0 || position > cachedTopPlayers.size()) {
+            return null;
+        }
+        int currentIndex = 1;
+        for (PlayerVoteData data : cachedTopPlayers) {
+            if (currentIndex == position) {
+                return data;
+            }
+            currentIndex++;
+        }
+        return null;
+    }
+
     /**
      * Gets the position of a player in the all-time vote leaderboard.
      * @param playerId UUID of the player
@@ -460,15 +506,8 @@ public class VoteStorage {
      * @param uuid UUID of the player
      * @param milestoneId ID of the milestone
      */
-    public boolean isMilestoneClaimed(UUID uuid, int milestoneId) throws SQLException {
-        String query = "SELECT claimed FROM player_milestones WHERE uuid = ? AND milestone_id = ?;";
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, uuid.toString());
-            ps.setInt(2, milestoneId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() && rs.getBoolean("claimed");
-            }
-        }
+    public boolean isMilestoneClaimed(UUID uuid, int milestoneId) {
+        return milestoneCache.getOrDefault(uuid, Collections.emptySet()).contains(milestoneId);
     }
     /**
      * Claims a milestone for the specified player.
@@ -477,45 +516,122 @@ public class VoteStorage {
      * @param milestoneId ID of the milestone
      */
     public void claimMilestone(UUID uuid, int milestoneId) throws SQLException {
+        milestoneCache.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(milestoneId);
+
+        CompletableFuture.runAsync(() -> {
+            String query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
+                    "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, milestoneId);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+    /**
+     * Saves the player milestones to the database.
+     */
+    public void saveMilestones() throws SQLException {
         String query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
                 "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, uuid.toString());
-            ps.setInt(2, milestoneId);
-            ps.executeUpdate();
+            for (Map.Entry<UUID, Set<Integer>> entry : milestoneCache.entrySet()) {
+                UUID uuid = entry.getKey();
+                for (int milestoneId : entry.getValue()) {
+                    ps.setString(1, uuid.toString());
+                    ps.setInt(2, milestoneId);
+                    ps.addBatch();
+                }
+            }
+            ps.executeBatch();
         }
+
+        Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eSaved &6" + milestoneCache.size() + " &eplayer milestones to the database."));
     }
     /**
-     * Adds a streak claim for the specified player.
-     *
-     * @param uuid UUID of the player
-     * @param streakId ID of the streak
+     * Loads the player milestones from the database.
      */
-    public void claimStreak(UUID uuid, int streakId) throws SQLException {
+    public void loadMilestones() throws SQLException {
+        String query = "SELECT uuid, milestone_id FROM player_milestones WHERE claimed = TRUE;";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                int milestoneId = rs.getInt("milestone_id");
+                milestoneCache.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(milestoneId);
+            }
+        }
+
+        Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eLoaded &6" + milestoneCache.size() + " &eplayer milestones from the database."));
+    }
+    /**
+     * Saves the player streaks to the database.
+     */
+    public void saveStreaks() throws SQLException {
         String query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
                 "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, uuid.toString());
-            ps.setInt(2, streakId);
-            ps.executeUpdate();
+            for (Map.Entry<UUID, Set<Integer>> entry : streakCache.entrySet()) {
+                UUID uuid = entry.getKey();
+                for (int streakId : entry.getValue()) {
+                    ps.setString(1, uuid.toString());
+                    ps.setInt(2, streakId);
+                    ps.addBatch();
+                }
+            }
+            ps.executeBatch();
         }
+
+        Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eSaved &6" + streakCache.size() + " &eplayer streaks to the database."));
     }
     /**
-     * Checks if a streak has been claimed by the player.
+     * Loads the player streaks from the database.
+     */
+    public void loadStreaks() throws SQLException {
+        String query = "SELECT uuid, streak_id FROM player_streaks WHERE claimed = TRUE;";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                int streakId = rs.getInt("streak_id");
+                streakCache.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(streakId);
+            }
+        }
+
+        Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eLoaded &6" + streakCache.size() + " &eplayer streaks from the database."));
+    }
+    /**
+     * Claims a streak for the specified player.
      *
      * @param uuid UUID of the player
      * @param streakId ID of the streak
-     * @return True if the streak has been claimed, false otherwise
      */
-    public boolean isStreakClaimed(UUID uuid, int streakId) throws SQLException {
-        String query = "SELECT claimed FROM player_streaks WHERE uuid = ? AND streak_id = ?;";
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, uuid.toString());
-            ps.setInt(2, streakId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() && rs.getBoolean("claimed");
+    public void claimStreak(UUID uuid, int streakId) {
+        streakCache.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(streakId);
+
+        CompletableFuture.runAsync(() -> {
+            String query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
+                    "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, streakId);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        }
+        });
+    }
+    /**
+     * Checks if a player has claimed a streak.
+     *
+     * @param uuid UUID of the player
+     * @param streakId ID of the streak
+     * @return True if the player has claimed the streak, false otherwise
+     */
+    public boolean isStreakClaimed(UUID uuid, int streakId) {
+        return streakCache.getOrDefault(uuid, Collections.emptySet()).contains(streakId);
     }
     /**
      * Closes the database connection.

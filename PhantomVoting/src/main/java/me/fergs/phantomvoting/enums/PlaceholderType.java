@@ -2,6 +2,8 @@ package me.fergs.phantomvoting.enums;
 
 import me.fergs.phantomvoting.database.VoteStorage;
 import me.fergs.phantomvoting.managers.VotePartyManager;
+import me.fergs.phantomvoting.objects.PlayerVoteData;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public enum PlaceholderType {
@@ -10,7 +12,7 @@ public enum PlaceholderType {
      */
     DAILY_VOTES("daily_votes") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerVoteCount(player.getUniqueId(), "daily"));
         }
     },
@@ -19,7 +21,7 @@ public enum PlaceholderType {
      */
     WEEKLY_VOTES("weekly_votes") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerVoteCount(player.getUniqueId(), "weekly"));
         }
     },
@@ -28,7 +30,7 @@ public enum PlaceholderType {
      */
     MONTHLY_VOTES("monthly_votes") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerVoteCount(player.getUniqueId(), "monthly"));
         }
     },
@@ -37,7 +39,7 @@ public enum PlaceholderType {
      */
     YEARLY_VOTES("yearly_votes") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerVoteCount(player.getUniqueId(), "yearly"));
         }
     },
@@ -46,7 +48,7 @@ public enum PlaceholderType {
      */
     ALL_TIME_VOTES("all_time_votes") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerVoteCount(player.getUniqueId(), "all_time"));
         }
     },
@@ -55,7 +57,7 @@ public enum PlaceholderType {
      */
     VOTE_PARTY_COUNT("vote_party_count") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(votePartyManager.getCurrentVoteCount());
         }
     },
@@ -64,7 +66,7 @@ public enum PlaceholderType {
      */
     VOTE_STREAK("vote_streak") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerStreak(player.getUniqueId()));
         }
     },
@@ -73,7 +75,7 @@ public enum PlaceholderType {
      */
     PLAYER_POSITION("player_position") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(voteStorage.getPlayerPosition(player.getUniqueId()));
         }
     },
@@ -82,8 +84,40 @@ public enum PlaceholderType {
      */
     VOTE_PARTY_THRESHOLD("vote_party_threshold") {
         @Override
-        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player) {
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
             return String.valueOf(votePartyManager.getVoteThreshold());
+        }
+    },
+    /**
+     * The placeholder type for the top player's name at a specific position.
+     */
+    TOP_PLAYER("top_player") {
+        @Override
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
+            if (extra == null) return "N/A";
+            try {
+                int position = Integer.parseInt(extra);
+                PlayerVoteData data = voteStorage.getTopPlayerAt(position);
+                return data != null ? Bukkit.getOfflinePlayer(data.getUuid()).getName() : " ";
+            } catch (NumberFormatException e) {
+                return "N/A";
+            }
+        }
+    },
+    /**
+     * The placeholder type for the top player's vote count at a specific position.
+     */
+    TOP_VOTES("top_votes") {
+        @Override
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
+            if (extra == null) return "N/A";
+            try {
+                int position = Integer.parseInt(extra);
+                PlayerVoteData data = voteStorage.getTopPlayerAt(position);
+                return data != null ? String.valueOf(data.getVoteCount()) : " ";
+            } catch (NumberFormatException e) {
+                return "N/A";
+            }
         }
     };
     /**
@@ -112,9 +146,10 @@ public enum PlaceholderType {
      * @param voteStorage      The vote storage instance.
      * @param votePartyManager The vote party manager instance.
      * @param player           The player to get the value for.
+     * @param extra            Any extra data to use.
      * @return The value for the placeholder.
      */
-    public abstract String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player);
+    public abstract String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra);
     /**
      * Gets the placeholder type from an identifier.
      *

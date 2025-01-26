@@ -15,8 +15,11 @@ import me.fergs.phantomvoting.listeners.VoteReceiveListener;
 import me.fergs.phantomvoting.listeners.modules.BossbarEventsListener;
 import me.fergs.phantomvoting.managers.*;
 import me.fergs.phantomvoting.modules.bossbar.BossbarManager;
+import me.fergs.phantomvoting.utils.ConsoleUtil;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.sql.SQLException;
 
 public final class PhantomVoting extends JavaPlugin {
     private static PhantomVoting instance;
@@ -44,6 +47,7 @@ public final class PhantomVoting extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        ConsoleUtil.printAsciiArt();
         listenerManager = new ListenerManager<>(this);
         listenerManager.registerListeners(
                 VoteReceiveListener.class,
@@ -66,6 +70,14 @@ public final class PhantomVoting extends JavaPlugin {
         configurationManager.loadModules();
         messageManager = new MessageManager<>(this, configurationManager);
         voteStorage = new VoteStorage("PhantomVoting");
+
+        try {
+            voteStorage.loadMilestones();
+            voteStorage.loadStreaks();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         votePartyManager = new VotePartyManager(this);
         leaderboardInventory = new LeaderboardInventory<>(this);
         playerManager = new PlayerManager<>(this);
@@ -94,6 +106,12 @@ public final class PhantomVoting extends JavaPlugin {
     }
     @Override
     public void onDisable() {
+        try {
+            voteStorage.saveMilestones();
+            voteStorage.saveStreaks();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         voteStorage.close();
         if (voteReminderManager != null) {
             voteReminderManager.cancelAllTasks();

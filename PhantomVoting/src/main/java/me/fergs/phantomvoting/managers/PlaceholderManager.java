@@ -3,6 +3,7 @@ package me.fergs.phantomvoting.managers;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.fergs.phantomvoting.database.VoteStorage;
 import me.fergs.phantomvoting.enums.PlaceholderType;
+import me.fergs.phantomvoting.utils.ConsoleUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ public class PlaceholderManager extends PlaceholderExpansion {
     @Override
     public boolean register() {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eRegistered &fPlaceholder-API &eplaceholder(s)."));
             return super.register();
         }
         return false;
@@ -34,7 +36,6 @@ public class PlaceholderManager extends PlaceholderExpansion {
     public @NotNull String getIdentifier() {
         return "phantomvoting";
     }
-
     @Override
     public @NotNull String getAuthor() {
         return "f.";
@@ -53,10 +54,19 @@ public class PlaceholderManager extends PlaceholderExpansion {
      */
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
+        if (identifier.contains("top_player")) {
+            return PlaceholderType.TOP_PLAYER.getValue(voteStorage, votePartyManager, player, identifier.substring(identifier.lastIndexOf("_") + 1));
+        }
+
+        if (identifier.contains("top_votes")) {
+            return PlaceholderType.TOP_VOTES.getValue(voteStorage, votePartyManager, player, identifier.substring(identifier.lastIndexOf("_") + 1));
+        }
+
         PlaceholderType type = PlaceholderType.fromIdentifier(identifier);
         if (type == null) {
             return "0";
         }
-        return type.getValue(voteStorage, votePartyManager, player);
+
+        return type.getValue(voteStorage, votePartyManager, player, null);
     }
 }

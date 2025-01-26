@@ -1,6 +1,8 @@
 package me.fergs.phantomvoting.config;
 
 import me.fergs.phantomvoting.modules.Module;
+import me.fergs.phantomvoting.utils.ConsoleUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -64,6 +66,7 @@ public class ConfigurationManager<T extends JavaPlugin> {
                     Module module = new Module(moduleName, isEnabled);
                     if (module.isEnabled()) {
                         enabledModules.add(module);
+                        Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eEnabled module: &f" + moduleName));
                     }
                 }
             } else {

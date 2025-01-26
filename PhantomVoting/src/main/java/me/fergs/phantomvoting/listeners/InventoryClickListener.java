@@ -129,32 +129,27 @@ public class InventoryClickListener implements Listener {
                 .filter(streakConfig -> streakConfig.getInt("slot", -1) == clickedSlot)
                 .findFirst()
                 .ifPresent(streakConfig -> {
-                    try {
-                        int requiredStreaks = streakConfig.getInt("streak-required");
-                        int playerStreaks = plugin.getVoteStorage().getPlayerStreak(playerUUID);
-                        int streakIndex = Integer.parseInt(streakConfig.getName().substring(1));
-                        boolean isClaimed = plugin.getVoteStorage().isStreakClaimed(playerUUID, streakIndex);
-                        if (isClaimed) {
-                            plugin.getMessageManager().sendMessage(player, "STREAK_ALREADY_CLAIMED");
-                        } else if (playerStreaks < requiredStreaks) {
-                            plugin.getMessageManager().sendMessage(player, "STREAK_NOT_ENOUGH", "%required_streak%", String.valueOf(requiredStreaks));
-                        } else {
-                            streakConfig.getStringList("Available.commands").forEach(command ->
-                                    plugin.getServer().dispatchCommand(
-                                            plugin.getServer().getConsoleSender(),
-                                            command.replace("%player%", player.getName())
-                                    )
-                            );
+                    int requiredStreaks = streakConfig.getInt("streak-required");
+                    int playerStreaks = plugin.getVoteStorage().getPlayerStreak(playerUUID);
+                    int streakIndex = Integer.parseInt(streakConfig.getName().substring(1));
+                    boolean isClaimed = plugin.getVoteStorage().isStreakClaimed(playerUUID, streakIndex);
+                    if (isClaimed) {
+                        plugin.getMessageManager().sendMessage(player, "STREAK_ALREADY_CLAIMED");
+                    } else if (playerStreaks < requiredStreaks) {
+                        plugin.getMessageManager().sendMessage(player, "STREAK_NOT_ENOUGH", "%required_streak%", String.valueOf(requiredStreaks));
+                    } else {
+                        streakConfig.getStringList("Available.commands").forEach(command ->
+                                plugin.getServer().dispatchCommand(
+                                        plugin.getServer().getConsoleSender(),
+                                        command.replace("%player%", player.getName())
+                                )
+                        );
 
-                            plugin.getVoteStorage().claimStreak(playerUUID, streakIndex);
+                        plugin.getVoteStorage().claimStreak(playerUUID, streakIndex);
 
-                            player.openInventory(plugin.getStreaksInventory().createInventory(player));
+                        player.openInventory(plugin.getStreaksInventory().createInventory(player));
 
-                            plugin.getMessageManager().sendMessage(player, "STREAK_CLAIMED");
-                        }
-                    } catch (SQLException e) {
-                        Bukkit.getLogger().warning("An error occurred for player " + player.getName() + " while claiming a streak");
-                        e.printStackTrace();
+                        plugin.getMessageManager().sendMessage(player, "STREAK_CLAIMED");
                     }
                 });
     }

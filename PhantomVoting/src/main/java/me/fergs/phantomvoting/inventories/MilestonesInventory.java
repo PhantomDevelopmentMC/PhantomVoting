@@ -16,7 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,28 +73,24 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<Runnable> tasks = new ArrayList<>();
             int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
-            try {
-                for (String key : menuSection.getKeys(false)) {
-                    ConfigurationSection milestoneConfig = menuSection.getConfigurationSection(key);
-                    int requiredVotes = milestoneConfig.getInt("required-votes");
-                    boolean isClaimed = plugin.getVoteStorage().isMilestoneClaimed(playerUUID, Integer.parseInt(key.substring(1)));
+            for (String key : menuSection.getKeys(false)) {
+                ConfigurationSection milestoneConfig = menuSection.getConfigurationSection(key);
+                int requiredVotes = milestoneConfig.getInt("required-votes");
+                boolean isClaimed = plugin.getVoteStorage().isMilestoneClaimed(playerUUID, Integer.parseInt(key.substring(1)));
 
-                    ItemStack item;
-                    if (isClaimed) {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Claimed"), requiredVotes);
-                    } else if (playerVotes >= requiredVotes) {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Available"), requiredVotes);
-                    } else {
-                        item = loadItem(milestoneConfig.getConfigurationSection("Locked"), requiredVotes);
-                    }
-
-                    int slot = milestoneConfig.getInt("slot", -1);
-                    if (slot >= 0 && slot < inventory.getSize()) {
-                        tasks.add(() -> inventory.setItem(slot, item));
-                    }
+                ItemStack item;
+                if (isClaimed) {
+                    item = loadItem(milestoneConfig.getConfigurationSection("Claimed"), requiredVotes);
+                } else if (playerVotes >= requiredVotes) {
+                    item = loadItem(milestoneConfig.getConfigurationSection("Available"), requiredVotes);
+                } else {
+                    item = loadItem(milestoneConfig.getConfigurationSection("Locked"), requiredVotes);
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
+
+                int slot = milestoneConfig.getInt("slot", -1);
+                if (slot >= 0 && slot < inventory.getSize()) {
+                    tasks.add(() -> inventory.setItem(slot, item));
+                }
             }
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {

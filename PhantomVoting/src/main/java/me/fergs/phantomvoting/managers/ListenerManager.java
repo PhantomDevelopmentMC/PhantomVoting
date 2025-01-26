@@ -1,5 +1,6 @@
 package me.fergs.phantomvoting.managers;
 
+import me.fergs.phantomvoting.utils.ConsoleUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -37,6 +38,7 @@ public class ListenerManager<T extends Plugin> {
             Listener listenerInstance = listenerClass.getDeclaredConstructor().newInstance();
             Bukkit.getPluginManager().registerEvents(listenerInstance, plugin);
             registeredListeners.add(listenerClass);
+            Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eRegistered listener &f" + listenerClass.getSimpleName() + "&e."));
         } catch (ReflectiveOperationException e) {
             plugin.getLogger().severe("Failed to register listener " + listenerClass.getName() + ": " + e.getMessage());
             e.printStackTrace();
