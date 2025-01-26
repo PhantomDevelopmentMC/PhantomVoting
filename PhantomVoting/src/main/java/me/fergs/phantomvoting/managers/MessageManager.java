@@ -1,5 +1,6 @@
 package me.fergs.phantomvoting.managers;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.fergs.phantomvoting.PhantomVoting;
 import me.fergs.phantomvoting.config.ConfigurationManager;
 import me.fergs.phantomvoting.utils.Color;
@@ -37,10 +38,17 @@ public class MessageManager<T extends PhantomVoting> {
         Optional<String> sound = getSound(key);
 
         if (message.isPresent() && isMessageEnabled(key)) {
-            message.get().forEach(line -> {
-                String formattedMessage = MessageParser.parse(line, placeholders);
-                executor.sendMessage(Color.hex(formattedMessage));
-            });
+            if (executor instanceof Player) {
+                message.get().forEach(line -> {
+                    String formattedMessage = MessageParser.parse(line, placeholders);
+                    executor.sendMessage(Component.text(Color.hex(PlaceholderAPI.setPlaceholders((Player) executor, formattedMessage))));
+                });
+            } else {
+                message.get().forEach(line -> {
+                    String formattedMessage = MessageParser.parse(line, placeholders);
+                    executor.sendMessage(Component.text(Color.hex(formattedMessage)));
+                });
+            }
         }
 
         if (isTitleEnabled(key) && executor instanceof Player) {

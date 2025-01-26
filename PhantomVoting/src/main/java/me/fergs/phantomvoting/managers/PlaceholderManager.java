@@ -22,7 +22,11 @@ public class PlaceholderManager extends PlaceholderExpansion {
         this.voteStorage = voteStorage;
         this.votePartyManager = votePartyManager;
     }
-
+    /**
+     * Registers the placeholders.
+     *
+     * @return Whether papi is enabled.
+     */
     @Override
     public boolean register() {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -31,28 +35,42 @@ public class PlaceholderManager extends PlaceholderExpansion {
         }
         return false;
     }
-
+    /**
+     * Gets the plugin identifier.
+     *
+     * @return The plugin identifier.
+     */
     @Override
     public @NotNull String getIdentifier() {
         return "phantomvoting";
     }
+    /**
+     * Gets the plugin author.
+     *
+     * @return The plugin author.
+     */
     @Override
     public @NotNull String getAuthor() {
         return "f.";
     }
-
+    /**
+     * Gets the plugin version.
+     *
+     * @return The plugin version.
+     */
     @Override
     public @NotNull String getVersion() {
         return "1.0";
     }
-
-    // PlaceholderAPI will check if the placeholder is persistable.
-    // Needed to avoid placeholder being lost on /papi reload.
+    /**
+     * Determines whether the placeholder should persist.
+     *
+     * @return Whether the placeholder should persist.
+     */
     @Override
     public boolean persist() {
         return true;
     }
-
     /**
      * Gets the value of the placeholder.
      *

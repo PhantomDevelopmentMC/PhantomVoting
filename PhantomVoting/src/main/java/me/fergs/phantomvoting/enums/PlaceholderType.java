@@ -94,13 +94,13 @@ public enum PlaceholderType {
     TOP_PLAYER("top_player") {
         @Override
         public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
-            if (extra == null) return "N/A";
+            if (extra == null) return "None";
             try {
                 int position = Integer.parseInt(extra);
                 PlayerVoteData data = voteStorage.getTopPlayerAt(position);
-                return data != null ? Bukkit.getOfflinePlayer(data.getUuid()).getName() : " ";
+                return data != null ? Bukkit.getOfflinePlayer(data.getUuid()).getName() : "None";
             } catch (NumberFormatException e) {
-                return "N/A";
+                return "None";
             }
         }
     },
@@ -110,13 +110,13 @@ public enum PlaceholderType {
     TOP_VOTES("top_votes") {
         @Override
         public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
-            if (extra == null) return "N/A";
+            if (extra == null) return "None";
             try {
                 int position = Integer.parseInt(extra);
                 PlayerVoteData data = voteStorage.getTopPlayerAt(position);
-                return data != null ? String.valueOf(data.getVoteCount()) : " ";
+                return data != null ? String.valueOf(data.getVoteCount()) : "0";
             } catch (NumberFormatException e) {
-                return "N/A";
+                return "0";
             }
         }
     };
