@@ -89,6 +89,15 @@ public enum PlaceholderType {
         }
     },
     /**
+     * The placeholder type for the remaining votes until the vote party.
+     */
+    VOTE_UNTIL_PARTY("vote_until_party") {
+        @Override
+        public String getValue(VoteStorage voteStorage, VotePartyManager votePartyManager, Player player, String extra) {
+            return String.valueOf(votePartyManager.getVoteThreshold() - votePartyManager.getCurrentVoteCount());
+        }
+    },
+    /**
      * The placeholder type for the top player's name at a specific position.
      */
     TOP_PLAYER("top_player") {

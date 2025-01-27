@@ -73,7 +73,7 @@ public class MessageManager<T extends PhantomVoting> {
         if (message.isPresent() && isMessageEnabled(key)) {
             message.get().forEach(line -> {
                 String formattedMessage = MessageParser.parse(line, placeholders);
-                Bukkit.getServer().broadcast(Component.text(Color.hex(formattedMessage)));
+                Bukkit.getServer().broadcast(Component.text(Color.hex(PlaceholderAPI.setPlaceholders(null, formattedMessage))));
             });
         }
 
