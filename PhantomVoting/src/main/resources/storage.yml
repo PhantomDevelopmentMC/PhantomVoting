@@ -1,5 +1,5 @@
 Storage-Settings:
-  type: "SQLITE" #MYSQL, SQLITE (SQLITE is recommended for small servers & non-networked servers)
+  type: "SQLITE" #MYSQL, SQLITE (SQLITE is recommended for small/medium servers & non-networked servers)
   host: "" #MYSQL (Case sensitive)
   username: "" #MYSQL (Case sensitive)
   password: "" #MYSQL (Case sensitive)

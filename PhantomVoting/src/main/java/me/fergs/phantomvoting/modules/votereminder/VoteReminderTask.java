@@ -9,7 +9,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  * A task that broadcasts a vote reminder message to all online players.
  */
 public class VoteReminderTask extends BukkitRunnable {
-    private final String message;
+    private final String[] message;
     private final String permission;
     /**
      * Initializes the VoteReminderTask with the plugin, message, and interval.
@@ -17,7 +17,7 @@ public class VoteReminderTask extends BukkitRunnable {
      * @param message The message to broadcast.
      */
     public VoteReminderTask(String message, String permission) {
-        this.message = message;
+        this.message = message.split("\n");
         this.permission = permission;
     }
     /**
@@ -25,12 +25,11 @@ public class VoteReminderTask extends BukkitRunnable {
      */
     @Override
     public void run() {
-        String[] lines = message.split("\n");
         PhantomVoting.getInstance().getPlayerManager().getPlayers().forEach(player -> {
             if (!player.hasPermission(permission)) {
                 return;
             }
-            for (String line : lines) {
+            for (String line : message) {
                 player.sendMessage(Color.hex(PlaceholderAPI.setPlaceholders(player, line)));
             }
         });

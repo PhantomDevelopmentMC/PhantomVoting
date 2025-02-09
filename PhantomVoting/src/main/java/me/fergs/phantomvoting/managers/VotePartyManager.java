@@ -101,7 +101,7 @@ public class VotePartyManager {
         plugin.getMessageManager().broadcastMessage("VOTE_PARTY_TRIGGERED");
 
         plugin.getPlayerManager().getPlayers().forEach(player -> {
-            for (String command : cachedCommands) {
+            for (final String command : cachedCommands) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
             }
 
