@@ -76,7 +76,7 @@ public class AdminCommands {
                             int amount = (int) args.get("amount");
                             assert target != null && amount > 0;
                             plugin.getVoteStorage().removeVote(target.getUniqueId(), amount);
-                            plugin.getMessageManager().sendMessage(player, "REMOVE_VOTE", "%player%", target.getName());
+                            plugin.getMessageManager().sendMessage(player, "REMOVE_VOTE", "%player%", target.getName(), "%amount%", String.valueOf(amount));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("voteparty")
