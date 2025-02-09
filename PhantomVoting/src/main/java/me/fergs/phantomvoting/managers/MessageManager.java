@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -68,19 +69,31 @@ public class MessageManager<T extends PhantomVoting> {
         }
     }
 
+    /**
+     * Processes and sends vote messages to the player.
+     * It supports clickable links in the format (Click Me)[URL].
+     */
     private void sendVoteMessage(Player player, List<String> lines, String... placeholders) {
-        lines.forEach(line -> {
-            line = Color.hex(PlaceholderAPI.setPlaceholders(player, line));
-            String formattedLine = MessageParser.parse(line, placeholders);
-            Component component = parseLine(formattedLine);
-            player.sendMessage(component);
-        });
+        LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.builder().hexColors().build();
+        for (String line : lines) {
+            if (line.isEmpty()) continue;
+            String processedLine = Color.hex(PlaceholderAPI.setPlaceholders(player, MessageParser.parse(line, placeholders)));
+            Component messageComponent = parseLine(processedLine, legacySerializer);
+            player.sendMessage(messageComponent);
+        }
     }
-
-    public Component parseLine(String line) {
+    /**
+     * Parses a single line, converting clickable segments defined in the format (Clickable Text)[URL]
+     * into clickable components using the provided legacy serializer.
+     *
+     * @param line The processed line with placeholders replaced.
+     * @param legacySerializer The serializer with hex color support.
+     * @return A Component representing the parsed line.
+     */
+    public Component parseLine(String line, LegacyComponentSerializer legacySerializer) {
         Matcher matcherTest = CLICKABLE_PATTERN.matcher(line);
         if (!matcherTest.find()) {
-            return Component.text(line);
+            return legacySerializer.deserialize(line);
         }
 
         TextComponent.Builder builder = Component.text();
@@ -89,18 +102,18 @@ public class MessageManager<T extends PhantomVoting> {
         while (matcher.find()) {
             int start = matcher.start();
             if (start > lastIndex) {
-                builder.append(Component.text(line.substring(lastIndex, start)));
+                builder.append(legacySerializer.deserialize(line.substring(lastIndex, start)));
             }
             String clickableText = matcher.group(1);
             String url = matcher.group(2);
-            Component clickableComponent = Component.text(clickableText)
-                    .clickEvent(ClickEvent.openUrl(url))
-                    .hoverEvent(HoverEvent.showText(Component.text("Click me!")));
+            Component clickableComponent = legacySerializer.deserialize(clickableText)
+                    .hoverEvent(HoverEvent.showText(Component.text("Click Me!")))
+                    .clickEvent(ClickEvent.openUrl(url));
             builder.append(clickableComponent);
             lastIndex = matcher.end();
         }
         if (lastIndex < line.length()) {
-            builder.append(Component.text(line.substring(lastIndex)));
+            builder.append(legacySerializer.deserialize(line.substring(lastIndex)));
         }
         return builder.build();
     }
