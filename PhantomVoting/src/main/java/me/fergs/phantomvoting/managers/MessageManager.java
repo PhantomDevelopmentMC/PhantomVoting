@@ -6,6 +6,9 @@ import me.fergs.phantomvoting.config.ConfigurationManager;
 import me.fergs.phantomvoting.utils.Color;
 import me.fergs.phantomvoting.utils.MessageParser;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -14,35 +17,35 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageManager<T extends PhantomVoting> {
-
     private final ConfigurationManager<?> configurationManager;
     private final T plugin;
-    /**
-     * Creates a new MessageManager instance.
-     * @param config The configuration file.
-     */
+    private final Pattern CLICKABLE_PATTERN = Pattern.compile("\\((.*?)\\)\\[(.*?)]");
+
     public MessageManager(T plugin, ConfigurationManager<?> config) {
         this.configurationManager = config;
         this.plugin = plugin;
     }
-    /**
-     * Send a message to the player if enabled in the config.
-     * @param executor The executor to send the message to.
-     * @param key The key for the message in the config.
-     * @param placeholders A map of placeholders to replace in the message.
-     */
+
     public void sendMessage(CommandSender executor, String key, String... placeholders) {
         Optional<List<String>> message = getMessage(key);
         Optional<String> sound = getSound(key);
 
         if (message.isPresent() && isMessageEnabled(key)) {
             if (executor instanceof Player) {
-                message.get().forEach(line -> {
-                    String formattedMessage = MessageParser.parse(line, placeholders);
-                    executor.sendMessage(Component.text(Color.hex(PlaceholderAPI.setPlaceholders((Player) executor, formattedMessage))));
-                });
+                Player player = (Player) executor;
+
+                if (key.equalsIgnoreCase("VOTE_LIST")) {
+                    sendVoteMessage(player, message.get(), placeholders);
+                } else {
+                    message.get().forEach(line -> {
+                        String formattedMessage = MessageParser.parse(line, placeholders);
+                        executor.sendMessage(Component.text(Color.hex(PlaceholderAPI.setPlaceholders(player, formattedMessage))));
+                    });
+                }
             } else {
                 message.get().forEach(line -> {
                     String formattedMessage = MessageParser.parse(line, placeholders);
@@ -54,12 +57,52 @@ public class MessageManager<T extends PhantomVoting> {
         if (isTitleEnabled(key) && executor instanceof Player) {
             Optional<String> title = getTitle(key);
             Optional<String> subtitle = getSubtitle(key);
-            title.ifPresent(titleString -> (((Player) executor).getPlayer()).sendTitle(Color.hex(MessageParser.parseKeyedValues(titleString, placeholders)), subtitle.map(s -> Color.hex(MessageParser.parse(s, placeholders))).orElse(null)));
+            title.ifPresent(titleString -> ((Player) executor).sendTitle(
+                    Color.hex(MessageParser.parseKeyedValues(titleString, placeholders)),
+                    subtitle.map(s -> Color.hex(MessageParser.parse(s, placeholders))).orElse(null)
+            ));
         }
 
         if (sound.isPresent() && isSoundEnabled(key) && executor instanceof Player) {
             playSound((Player) executor, sound.get());
         }
+    }
+
+    private void sendVoteMessage(Player player, List<String> lines, String... placeholders) {
+        lines.forEach(line -> {
+            line = Color.hex(PlaceholderAPI.setPlaceholders(player, line));
+            String formattedLine = MessageParser.parse(line, placeholders);
+            Component component = parseLine(formattedLine);
+            player.sendMessage(component);
+        });
+    }
+
+    public Component parseLine(String line) {
+        Matcher matcherTest = CLICKABLE_PATTERN.matcher(line);
+        if (!matcherTest.find()) {
+            return Component.text(line);
+        }
+
+        TextComponent.Builder builder = Component.text();
+        int lastIndex = 0;
+        Matcher matcher = CLICKABLE_PATTERN.matcher(line);
+        while (matcher.find()) {
+            int start = matcher.start();
+            if (start > lastIndex) {
+                builder.append(Component.text(line.substring(lastIndex, start)));
+            }
+            String clickableText = matcher.group(1);
+            String url = matcher.group(2);
+            Component clickableComponent = Component.text(clickableText)
+                    .clickEvent(ClickEvent.openUrl(url))
+                    .hoverEvent(HoverEvent.showText(Component.text("Click me!")));
+            builder.append(clickableComponent);
+            lastIndex = matcher.end();
+        }
+        if (lastIndex < line.length()) {
+            builder.append(Component.text(line.substring(lastIndex)));
+        }
+        return builder.build();
     }
     /**
      * Broadcast a message to all players if enabled in the config.

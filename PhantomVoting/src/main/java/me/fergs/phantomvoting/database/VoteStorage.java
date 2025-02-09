@@ -1,8 +1,10 @@
 package me.fergs.phantomvoting.database;
 
+import me.fergs.phantomvoting.config.YamlConfigFile;
 import me.fergs.phantomvoting.objects.PlayerVoteData;
 import me.fergs.phantomvoting.utils.ConsoleUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -20,26 +22,46 @@ public class VoteStorage {
     );
     private final Map<UUID, Set<Integer>> milestoneCache = new ConcurrentHashMap<>();
     private final Map<UUID, Set<Integer>> streakCache = new ConcurrentHashMap<>();
+    private final String databaseUrl, username, password;
+    private final boolean useMySQL;
+
     /**
      * Creates a new VoteStorage instance.
      *
      * @param dataFolder The plugin's data folder.
+     * @param storageConfig The storage configuration.
      */
-    public VoteStorage(String dataFolder) {
+    public VoteStorage(String dataFolder, YamlConfigFile storageConfig) {
+        ConfigurationSection storageSection = storageConfig.getConfigurationSection("Storage-Settings");
+        String type = storageSection.getString("type", "SQLITE");
+        String host = storageSection.getString("host", "");
+        this.username = storageSection.getString("username", "");
+        this.password = storageSection.getString("password", "");
+        String port = storageSection.getString("port", "");
+        String database = storageSection.getString("database", "");
+        this.useMySQL = type.equalsIgnoreCase("SQL");
+        this.databaseUrl = useMySQL
+                ? "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&autoReconnect=true"
+                : "jdbc:sqlite:plugins/" + dataFolder + "/votes.db";
+
         try {
-            connectDatabase(dataFolder);
+            connectDatabase();
             initializeDatabase();
-            Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eConnected to &fSQLite &edatabase."));
+            Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eConnected to the &f" + (useMySQL ? "MySQL" : "SQLite") + "&e database."));
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     /**
-     * Connects to the SQLite database.
+     * Connects to the database (SQLite or MySQL).
      */
-    private void connectDatabase(String dataFolder) throws SQLException {
-        String url = "jdbc:sqlite:plugins/" + dataFolder + "/votes.db";
-        connection = DriverManager.getConnection(url);
+    private void connectDatabase() throws SQLException {
+        if (useMySQL) {
+            connection = DriverManager.getConnection(databaseUrl, username, password);
+        } else {
+            connection = DriverManager.getConnection(databaseUrl);
+        }
     }
     /**
      * Initializes the database by creating the necessary table if it doesn't exist.
@@ -179,7 +201,63 @@ public class VoteStorage {
             e.printStackTrace();
         }
     }
+    /**
+     * Adds multiple votes to the specified player's record and updates all vote counts.
+     * If a timestamp is expired, it resets the count and updates the timestamp.
+     *
+     * @param playerUUID UUID of the player
+     * @param voteAmount The number of votes to add
+     */
+    public void addMultipleVotes(UUID playerUUID, int voteAmount) {
+        if (voteAmount <= 0) {
+            return;
+        }
 
+        LocalDateTime now = LocalDateTime.now();
+        String currentTimestamp = now.toString();
+
+        try {
+            String selectSQL = "SELECT * FROM player_votes WHERE uuid = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
+                pstmt.setString(1, playerUUID.toString());
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    LocalDateTime dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"));
+                    LocalDateTime weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"));
+                    LocalDateTime monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"));
+                    LocalDateTime yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"));
+
+                    boolean resetDaily = dailyTimestamp.isBefore(now.minusDays(1));
+                    boolean resetWeekly = weeklyTimestamp.isBefore(now.minusWeeks(1));
+                    boolean resetMonthly = monthlyTimestamp.isBefore(now.minusMonths(1));
+                    boolean resetYearly = yearlyTimestamp.isBefore(now.minusYears(1));
+
+                    String updateSQL = "UPDATE player_votes SET " +
+                            "daily_count = ?, weekly_count = ?, monthly_count = ?, yearly_count = ?, " +
+                            "all_time_count = all_time_count + ?," +
+                            "daily_timestamp = ?, weekly_timestamp = ?, monthly_timestamp = ?, yearly_timestamp = ? " +
+                            "WHERE uuid = ?";
+
+                    try (PreparedStatement updateStmt = connection.prepareStatement(updateSQL)) {
+                        updateStmt.setInt(1, resetDaily ? voteAmount : rs.getInt("daily_count") + voteAmount);
+                        updateStmt.setInt(2, resetWeekly ? voteAmount : rs.getInt("weekly_count") + voteAmount);
+                        updateStmt.setInt(3, resetMonthly ? voteAmount : rs.getInt("monthly_count") + voteAmount);
+                        updateStmt.setInt(4, resetYearly ? voteAmount : rs.getInt("yearly_count") + voteAmount);
+                        updateStmt.setInt(5, voteAmount);
+                        updateStmt.setString(6, resetDaily ? currentTimestamp : rs.getString("daily_timestamp"));
+                        updateStmt.setString(7, resetWeekly ? currentTimestamp : rs.getString("weekly_timestamp"));
+                        updateStmt.setString(8, resetMonthly ? currentTimestamp : rs.getString("monthly_timestamp"));
+                        updateStmt.setString(9, resetYearly ? currentTimestamp : rs.getString("yearly_timestamp"));
+                        updateStmt.setString(10, playerUUID.toString());
+                        updateStmt.executeUpdate();
+                    }
+                } else Bukkit.getLogger().info(ConsoleUtil.translateColors("&4[&c!&4] &cPlayer &f" + playerUUID + " &chas no record in the database, please use test-vote to add a record."));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * Resets a specific vote period if the timestamp is expired (older than the threshold).
      * @param period The vote period to reset (daily, weekly, monthly, yearly)

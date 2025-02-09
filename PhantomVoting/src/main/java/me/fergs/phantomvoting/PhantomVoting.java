@@ -61,6 +61,7 @@ public final class PhantomVoting extends JavaPlugin {
                 "messages",
                 "voteparty",
                 "modules",
+                "storage",
                 "modules/bossbar",
                 "modules/vote_reminder",
                 "menus/leaderboard",
@@ -69,7 +70,7 @@ public final class PhantomVoting extends JavaPlugin {
 
         configurationManager.loadModules();
         messageManager = new MessageManager<>(this, configurationManager);
-        voteStorage = new VoteStorage("PhantomVoting");
+        voteStorage = new VoteStorage("PhantomVoting", configurationManager.getConfig("storage"));
 
         try {
             voteStorage.loadMilestones();

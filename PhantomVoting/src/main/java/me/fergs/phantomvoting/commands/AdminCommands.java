@@ -43,12 +43,13 @@ public class AdminCommands {
                         })
                 )
                 .withSubcommand(new CommandAPICommand("givevote")
-                        .withArguments(new PlayerArgument("player"))
+                        .withArguments(new PlayerArgument("player"), new IntegerArgument("amount"))
                         .executes((player, args) -> {
                             Player target = (Player) args.get("player");
+                            int amount = (int) args.get("amount");
                             assert target != null;
-                            plugin.getVoteStorage().addVote(target.getUniqueId());
-                            plugin.getMessageManager().sendMessage(player, "GIVE_VOTE", "%player%", target.getName());
+                            plugin.getVoteStorage().addMultipleVotes(target.getUniqueId(), amount);
+                            plugin.getMessageManager().sendMessage(player, "GIVE_VOTE", "%player%", target.getName(), "%amount%", String.valueOf(amount));
                         })
                 )
                 .withSubcommand(new CommandAPICommand("testvote")

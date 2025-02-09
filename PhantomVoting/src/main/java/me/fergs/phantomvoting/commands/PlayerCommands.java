@@ -55,7 +55,6 @@ public class PlayerCommands{
                                         plugin.getMessageManager().sendMessage(player, "VOTE_REMINDER_TOGGLE", "%status%", "enabled");
                                     }
                                     else {
-
                                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Remove-Permission-Command", "this should be a command")
                                                 .replace("%player%", player.getName()));
 
