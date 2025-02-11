@@ -17,6 +17,7 @@ import me.fergs.phantomvoting.managers.*;
 import me.fergs.phantomvoting.modules.bossbar.BossbarManager;
 import me.fergs.phantomvoting.utils.ConsoleUtil;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -83,7 +84,9 @@ public final class PhantomVoting extends JavaPlugin {
         leaderboardInventory = new LeaderboardInventory<>(this);
         playerManager = new PlayerManager<>(this);
 
-        new PlaceholderManager(voteStorage, votePartyManager).register();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderManager(voteStorage, votePartyManager).register();
+        }
 
         new PlayerCommands().register(this);
         new AdminCommands().register(this);

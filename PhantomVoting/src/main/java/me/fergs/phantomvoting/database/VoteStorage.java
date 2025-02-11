@@ -9,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 public class VoteStorage {
     private Connection connection;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final TreeSet<PlayerVoteData> cachedTopPlayers = new TreeSet<>(
             Comparator.comparingInt(PlayerVoteData::getVoteCount).reversed()
                     .thenComparing(PlayerVoteData::getUuid)
@@ -63,47 +65,85 @@ public class VoteStorage {
             connection = DriverManager.getConnection(databaseUrl);
         }
     }
-    /**
-     * Initializes the database by creating the necessary table if it doesn't exist.
-     */
     private void initializeDatabase() throws SQLException {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS player_votes (" +
-                "uuid TEXT PRIMARY KEY," +
-                "daily_count INTEGER DEFAULT 0," +
-                "weekly_count INTEGER DEFAULT 0," +
-                "monthly_count INTEGER DEFAULT 0," +
-                "yearly_count INTEGER DEFAULT 0," +
-                "all_time_count INTEGER DEFAULT 0," +
-                "daily_timestamp TEXT," +
-                "weekly_timestamp TEXT," +
-                "monthly_timestamp TEXT," +
-                "yearly_timestamp TEXT," +
-                "streak_count INTEGER DEFAULT 0," +
-                "last_vote_date TEXT" +
-                ");";
+        String createTableSQL;
+        String createVotePartyTableSQL;
+        String createMilestonesTableSQL;
+        String createStreaksTableSQL;
 
-        String createVotePartyTableSQL = "CREATE TABLE IF NOT EXISTS vote_party (" +
-                "current_vote_count INTEGER DEFAULT 0);";
+        if (useMySQL) {
+            createTableSQL = "CREATE TABLE IF NOT EXISTS player_votes (" +
+                    "uuid VARCHAR(36) PRIMARY KEY," +
+                    "daily_count INT DEFAULT 0," +
+                    "weekly_count INT DEFAULT 0," +
+                    "monthly_count INT DEFAULT 0," +
+                    "yearly_count INT DEFAULT 0," +
+                    "all_time_count INT DEFAULT 0," +
+                    "daily_timestamp DATETIME," +
+                    "weekly_timestamp DATETIME," +
+                    "monthly_timestamp DATETIME," +
+                    "yearly_timestamp DATETIME," +
+                    "streak_count INT DEFAULT 0," +
+                    "last_vote_date DATETIME" +
+                    ");";
 
-        String createMilestonesTableSQL = "CREATE TABLE IF NOT EXISTS player_milestones (" +
-                "uuid TEXT NOT NULL," +
-                "milestone_id INTEGER NOT NULL," +
-                "claimed BOOLEAN DEFAULT FALSE," +
-                "PRIMARY KEY (uuid, milestone_id)" +
-                ");";
+            createVotePartyTableSQL = "CREATE TABLE IF NOT EXISTS vote_party (" +
+                    "current_vote_count INT DEFAULT 0" +
+                    ");";
 
-        String createStreaksTableSQL = "CREATE TABLE IF NOT EXISTS player_streaks (" +
-                "uuid TEXT NOT NULL," +
-                "streak_id INTEGER NOT NULL," +
-                "claimed BOOLEAN DEFAULT FALSE," +
-                "PRIMARY KEY (uuid, streak_id)" +
-                ");";
+            createMilestonesTableSQL = "CREATE TABLE IF NOT EXISTS player_milestones (" +
+                    "uuid VARCHAR(36) NOT NULL," +
+                    "milestone_id INT NOT NULL," +
+                    "claimed BOOLEAN DEFAULT FALSE," +
+                    "PRIMARY KEY (uuid, milestone_id)" +
+                    ");";
+
+            createStreaksTableSQL = "CREATE TABLE IF NOT EXISTS player_streaks (" +
+                    "uuid VARCHAR(36) NOT NULL," +
+                    "streak_id INT NOT NULL," +
+                    "claimed BOOLEAN DEFAULT FALSE," +
+                    "PRIMARY KEY (uuid, streak_id)" +
+                    ");";
+        } else {
+            createTableSQL = "CREATE TABLE IF NOT EXISTS player_votes (" +
+                    "uuid TEXT PRIMARY KEY," +
+                    "daily_count INTEGER DEFAULT 0," +
+                    "weekly_count INTEGER DEFAULT 0," +
+                    "monthly_count INTEGER DEFAULT 0," +
+                    "yearly_count INTEGER DEFAULT 0," +
+                    "all_time_count INTEGER DEFAULT 0," +
+                    "daily_timestamp TEXT," +
+                    "weekly_timestamp TEXT," +
+                    "monthly_timestamp TEXT," +
+                    "yearly_timestamp TEXT," +
+                    "streak_count INTEGER DEFAULT 0," +
+                    "last_vote_date TEXT" +
+                    ");";
+
+            createVotePartyTableSQL = "CREATE TABLE IF NOT EXISTS vote_party (" +
+                    "current_vote_count INTEGER DEFAULT 0" +
+                    ");";
+
+            createMilestonesTableSQL = "CREATE TABLE IF NOT EXISTS player_milestones (" +
+                    "uuid TEXT NOT NULL," +
+                    "milestone_id INTEGER NOT NULL," +
+                    "claimed BOOLEAN DEFAULT FALSE," +
+                    "PRIMARY KEY (uuid, milestone_id)" +
+                    ");";
+
+            createStreaksTableSQL = "CREATE TABLE IF NOT EXISTS player_streaks (" +
+                    "uuid TEXT NOT NULL," +
+                    "streak_id INTEGER NOT NULL," +
+                    "claimed BOOLEAN DEFAULT FALSE," +
+                    "PRIMARY KEY (uuid, streak_id)" +
+                    ");";
+        }
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute(createTableSQL);
-            stmt.execute(createVotePartyTableSQL);
-            stmt.execute(createMilestonesTableSQL);
-            stmt.execute(createStreaksTableSQL);
+            stmt.executeUpdate(createTableSQL);
+            stmt.executeUpdate(createVotePartyTableSQL);
+            stmt.executeUpdate(createMilestonesTableSQL);
+            stmt.executeUpdate(createStreaksTableSQL);
         }
 
         checkAndAddColumns();
@@ -114,24 +154,20 @@ public class VoteStorage {
      */
     public void checkAndAddColumns() {
         try {
-            String addStreakCountColumnQuery = "ALTER TABLE player_votes ADD COLUMN streak_count INTEGER DEFAULT 0";
-            String addLastVoteDateColumnQuery = "ALTER TABLE player_votes ADD COLUMN last_vote_date TEXT";
-            try (PreparedStatement stmt = connection.prepareStatement(addStreakCountColumnQuery)) {
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("duplicate column name")) {
-                    throw e;
+            if (!columnExists("player_votes", "streak_count")) {
+                String addStreakCountColumnQuery = "ALTER TABLE player_votes ADD COLUMN streak_count "
+                        + (useMySQL ? "INT DEFAULT 0" : "INTEGER DEFAULT 0");
+                try (PreparedStatement stmt = connection.prepareStatement(addStreakCountColumnQuery)) {
+                    stmt.executeUpdate();
                 }
             }
-
-            try (PreparedStatement stmt = connection.prepareStatement(addLastVoteDateColumnQuery)) {
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("duplicate column name")) {
-                    throw e;
+            if (!columnExists("player_votes", "last_vote_date")) {
+                String addLastVoteDateColumnQuery = "ALTER TABLE player_votes ADD COLUMN last_vote_date "
+                        + (useMySQL ? "DATETIME" : "TEXT");
+                try (PreparedStatement stmt = connection.prepareStatement(addLastVoteDateColumnQuery)) {
+                    stmt.executeUpdate();
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -152,10 +188,21 @@ public class VoteStorage {
                 ResultSet rs = pstmt.executeQuery();
 
                 if (rs.next()) {
-                    LocalDateTime dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"));
-                    LocalDateTime weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"));
-                    LocalDateTime monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"));
-                    LocalDateTime yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"));
+                    LocalDateTime dailyTimestamp;
+                    LocalDateTime weeklyTimestamp;
+                    LocalDateTime monthlyTimestamp;
+                    LocalDateTime yearlyTimestamp;
+                    if (useMySQL) {
+                        dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"), formatter);
+                        weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"), formatter);
+                        monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"), formatter);
+                        yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"), formatter);
+                    } else {
+                        dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"));
+                        weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"));
+                        monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"));
+                        yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"));
+                    }
 
                     if (dailyTimestamp.isBefore(now.minusDays(1))) {
                         resetVote("daily", playerUUID, currentTimestamp);
@@ -223,10 +270,21 @@ public class VoteStorage {
                 ResultSet rs = pstmt.executeQuery();
 
                 if (rs.next()) {
-                    LocalDateTime dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"));
-                    LocalDateTime weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"));
-                    LocalDateTime monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"));
-                    LocalDateTime yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"));
+                    LocalDateTime dailyTimestamp;
+                    LocalDateTime weeklyTimestamp;
+                    LocalDateTime monthlyTimestamp;
+                    LocalDateTime yearlyTimestamp;
+                    if (useMySQL) {
+                        dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"), formatter);
+                        weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"), formatter);
+                        monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"), formatter);
+                        yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"), formatter);
+                    } else {
+                        dailyTimestamp = LocalDateTime.parse(rs.getString("daily_timestamp"));
+                        weeklyTimestamp = LocalDateTime.parse(rs.getString("weekly_timestamp"));
+                        monthlyTimestamp = LocalDateTime.parse(rs.getString("monthly_timestamp"));
+                        yearlyTimestamp = LocalDateTime.parse(rs.getString("yearly_timestamp"));
+                    }
 
                     boolean resetDaily = dailyTimestamp.isBefore(now.minusDays(1));
                     boolean resetWeekly = weeklyTimestamp.isBefore(now.minusWeeks(1));
@@ -448,7 +506,13 @@ public class VoteStorage {
                         incrementStreak(playerUUID, 1, currentTimestamp);
                         return;
                     }
-                    LocalDate lastVoteDate = LocalDate.parse(rs.getString("last_vote_date"));
+                    LocalDate lastVoteDate;
+                    if (useMySQL) {
+                        LocalDateTime lastVoteDateTime = LocalDateTime.parse(rs.getString("last_vote_date"), formatter);
+                        lastVoteDate = lastVoteDateTime.toLocalDate();
+                    } else {
+                        lastVoteDate = LocalDate.parse(rs.getString("last_vote_date"));
+                    }
                     int currentStreak = rs.getInt("streak_count");
 
                     if (lastVoteDate.equals(today.minusDays(1))) {
@@ -710,6 +774,20 @@ public class VoteStorage {
      */
     public boolean isStreakClaimed(UUID uuid, int streakId) {
         return streakCache.getOrDefault(uuid, Collections.emptySet()).contains(streakId);
+    }
+    /**
+     * Checks if a given column exists in the specified table.
+     *
+     * @param tableName  The table name.
+     * @param columnName The column name.
+     * @return true if the column exists, false otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+    private boolean columnExists(String tableName, String columnName) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        try (ResultSet rs = metaData.getColumns(null, null, tableName, columnName)) {
+            return rs.next();
+        }
     }
     /**
      * Closes the database connection.
