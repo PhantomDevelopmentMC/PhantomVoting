@@ -10,7 +10,7 @@
 - **📈 Clones**: null
 - **👀 Views**: null
 - **🌐 Languages**: Java (100%)
-- **🛠️ Dependencies**: [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13488/) (for vote handling)
+- **🛠️ Dependencies**: [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13449/) (for vote handling)
 - **📅 Last Updated**: ![Last Commit](https://img.shields.io/github/last-commit/PhantomDevelopmentMC/PhantomVoting)
 
 ---
@@ -44,7 +44,7 @@
    Download the latest release from the [GitHub Releases](https://github.com/PhantomDevelopmentMC/PhantomVoting/releases) page and place it in your server’s `plugins` directory.
 
 2. **Install NuVotifier**  
-   Make sure [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13488/) is installed and configured on your server.
+   Make sure [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13449/) is installed and configured on your server.
 
 3. **Restart Your Server**  
    Start or restart your server to load Phantom Voting. Configure the plugin by editing `config.yml` as desired.
