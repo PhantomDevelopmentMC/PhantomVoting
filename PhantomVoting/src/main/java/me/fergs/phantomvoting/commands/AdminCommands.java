@@ -3,10 +3,9 @@ package me.fergs.phantomvoting.commands;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.BooleanArgument;
-import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.PlayerArgument;
+import dev.jorel.commandapi.arguments.*;
 import me.fergs.phantomvoting.PhantomVoting;
+import me.fergs.phantomvoting.utils.Color;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -133,6 +132,35 @@ public class AdminCommands {
                                     plugin.getMessageManager().sendMessage(player, "STREAK_ADD", "%player%", target.getName(), "%streak%", String.valueOf(streak));
                                 })
                         )
+                )
+                .withSubcommand(new CommandAPICommand("opengui")
+                        .withArguments(new PlayerArgument("target"), new StringArgument("gui")
+                                .replaceSuggestions(ArgumentSuggestions.strings("leaderboard", "milestones", "streaks"))
+                        )
+                        .executes((player, args) -> {
+                            Player target = (Player) args.get("target");
+                            String gui = (String) args.get("gui");
+                            assert target != null;
+                            if (gui == null) {
+                                player.sendMessage(Color.hex("&4&l[&c&l!&4&l] &cThe GUI type &f" + gui + " &cdoes not exist."));
+                                return;
+                            }
+                            switch (gui) {
+                                case "leaderboard":
+                                    target.openInventory(plugin.getLeaderboardInventory().createInventory(target));
+                                    break;
+                                case "milestones":
+                                    if (plugin.getConfigurationManager().isModuleEnabled("Milestones")) {
+                                        target.openInventory(plugin.getMilestonesInventory().createInventory(target));
+                                    }
+                                    break;
+                                case "streaks":
+                                    if (plugin.getConfigurationManager().isModuleEnabled("Streaks-Menu")) {
+                                        target.openInventory(plugin.getStreaksInventory().createInventory(target));
+                                    }
+                                    break;
+                            }
+                        })
                 )
                 .register();
     }

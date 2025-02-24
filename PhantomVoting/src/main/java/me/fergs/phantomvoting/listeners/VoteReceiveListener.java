@@ -10,12 +10,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
  * A listener for handling vote events.
  */
 public class VoteReceiveListener implements Listener {
+
+    final Random random = new Random();
+
     /**
      * Handles a vote event.
      *
@@ -54,7 +58,7 @@ public class VoteReceiveListener implements Listener {
                 if (hasPermissionString && !player.hasPermission(rewardSection.getString("Permission", "phantomvoting.default"))) {
                     continue;
                 }
-                if (Math.random() * 100 <= chance) {
+                if (random.nextInt(100) + 1 <= chance) {
                     final Set<String> rewardCommands = new HashSet<>(rewardSection.getStringList("Commands"));
                     for (final String command : rewardCommands) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));

@@ -76,6 +76,7 @@ public final class PhantomVoting extends JavaPlugin {
         try {
             voteStorage.loadMilestones();
             voteStorage.loadStreaks();
+            voteStorage.loadCurrentGlobalVoteCount();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -113,6 +114,7 @@ public final class PhantomVoting extends JavaPlugin {
         try {
             voteStorage.saveMilestones();
             voteStorage.saveStreaks();
+            voteStorage.saveCurrentGlobalVoteCount();
         } catch (SQLException e) {
             e.printStackTrace();
         }

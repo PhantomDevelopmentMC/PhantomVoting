@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class VoteStorage {
@@ -24,6 +25,7 @@ public class VoteStorage {
     );
     private final Map<UUID, Set<Integer>> milestoneCache = new ConcurrentHashMap<>();
     private final Map<UUID, Set<Integer>> streakCache = new ConcurrentHashMap<>();
+    private final AtomicInteger currentGlobalVoteCount = new AtomicInteger(0);
     private final String databaseUrl, username, password;
     private final boolean useMySQL;
 
@@ -384,10 +386,28 @@ public class VoteStorage {
      * @param count The current global vote count
      */
     public void setCurrentGlobalVoteCount(int count) {
-        String updateSQL = "UPDATE vote_party SET current_vote_count = ?";
+        if (count <= 0) {
+            count = 0;
+        }
+
+        currentGlobalVoteCount.set(count);
+    }
+    /**
+     * Saves the current global vote count to the database.
+     */
+    public void saveCurrentGlobalVoteCount() {
+        String updateSQL = "UPDATE vote_party SET current_vote_count = ?;";
+        String insertSQL = "INSERT INTO vote_party (current_vote_count) VALUES (?) ON DUPLICATE KEY UPDATE current_vote_count = VALUES(current_vote_count);";
+
         try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
-            pstmt.setInt(1, count);
-            pstmt.executeUpdate();
+            pstmt.setInt(1, currentGlobalVoteCount.get());
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                try (PreparedStatement insertStmt = connection.prepareStatement(insertSQL)) {
+                    insertStmt.setInt(1, currentGlobalVoteCount.get());
+                    insertStmt.executeUpdate();
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -397,16 +417,22 @@ public class VoteStorage {
      * @return The current global vote count
      */
     public int getCurrentGlobalVoteCount() {
-        String querySQL = "SELECT current_vote_count FROM vote_party";
+        return Math.max(currentGlobalVoteCount.get(), 0);
+
+    }
+    /**
+     * Loads the current global vote count from the database.
+     */
+    public void loadCurrentGlobalVoteCount() {
+        String querySQL = "SELECT current_vote_count FROM vote_party;";
         try (PreparedStatement pstmt = connection.prepareStatement(querySQL)) {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("current_vote_count");
+                currentGlobalVoteCount.set(rs.getInt("current_vote_count"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 0;
     }
     /**
      * Gets the top players based on all-time vote count.
@@ -661,8 +687,15 @@ public class VoteStorage {
         milestoneCache.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(milestoneId);
 
         CompletableFuture.runAsync(() -> {
-            String query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
-                    "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
+            String query;
+            if (useMySQL) {
+                query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
+                        "VALUES (?, ?, TRUE) ON DUPLICATE KEY UPDATE claimed = TRUE;";
+            }
+            else {
+                query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
+                        "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
+            }
             try (PreparedStatement ps = connection.prepareStatement(query)) {
                 ps.setString(1, uuid.toString());
                 ps.setInt(2, milestoneId);
@@ -676,8 +709,15 @@ public class VoteStorage {
      * Saves the player milestones to the database.
      */
     public void saveMilestones() throws SQLException {
-        String query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
-                "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
+        String query;
+        if (useMySQL) {
+            query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
+                    "VALUES (?, ?, TRUE) ON DUPLICATE KEY UPDATE claimed = TRUE;";
+        }
+        else {
+            query = "INSERT INTO player_milestones (uuid, milestone_id, claimed) " +
+                    "VALUES (?, ?, TRUE) ON CONFLICT(uuid, milestone_id) DO UPDATE SET claimed = TRUE;";
+        }
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             for (Map.Entry<UUID, Set<Integer>> entry : milestoneCache.entrySet()) {
                 UUID uuid = entry.getKey();
@@ -712,8 +752,15 @@ public class VoteStorage {
      * Saves the player streaks to the database.
      */
     public void saveStreaks() throws SQLException {
-        String query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
-                "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
+        String query;
+        if (useMySQL) {
+            query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
+                    "VALUES (?, ?, TRUE) ON DUPLICATE KEY UPDATE claimed = TRUE;";
+        }
+        else {
+            query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
+                    "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
+        }
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             for (Map.Entry<UUID, Set<Integer>> entry : streakCache.entrySet()) {
                 UUID uuid = entry.getKey();
@@ -754,8 +801,15 @@ public class VoteStorage {
         streakCache.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet()).add(streakId);
 
         CompletableFuture.runAsync(() -> {
-            String query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
-                    "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
+            String query;
+            if (useMySQL) {
+                query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
+                        "VALUES (?, ?, TRUE) ON DUPLICATE KEY UPDATE claimed = TRUE;";
+            }
+            else {
+                query = "INSERT INTO player_streaks (uuid, streak_id, claimed) " +
+                        "VALUES (?, ?, TRUE) ON CONFLICT(uuid, streak_id) DO UPDATE SET claimed = TRUE;";
+            }
             try (PreparedStatement ps = connection.prepareStatement(query)) {
                 ps.setString(1, uuid.toString());
                 ps.setInt(2, streakId);

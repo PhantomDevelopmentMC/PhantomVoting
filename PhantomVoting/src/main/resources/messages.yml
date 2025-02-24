@@ -79,6 +79,14 @@ Messages:
       Enable: true
       Value: '&4&l[&c&l!&4&l] &cHey! This is currently disabled or undergoing maintenance.'
 
+  NO_PERMISSION:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&4&l[&c&l!&4&l] &cYou do not have permission to execute this command.'
+
   VOTE_REMINDER_TOGGLE:
     Sound:
       Enable: true

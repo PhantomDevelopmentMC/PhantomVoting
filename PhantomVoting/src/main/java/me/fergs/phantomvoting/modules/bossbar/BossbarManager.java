@@ -120,7 +120,7 @@ public class BossbarManager<T extends PhantomVoting> {
      */
     private void triggerVoteParty(Player player) {
         if (!isModuleEnabled) return;
-        player.playSound(player.getLocation(), Sound.valueOf(completionSound), 1.0f, 1.0f);
+        player.playSound(player, Sound.valueOf(completionSound), 1.0f, 1.0f);
     }
     /**
      *  Adds the bossbar to a player.
