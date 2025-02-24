@@ -62,6 +62,7 @@ public class InventoryClickListener implements Listener {
 
         int clickedSlot = event.getSlot();
         if (clickedSlot < 0) return;
+        int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
 
         menuSection.getKeys(false).stream()
                 .map(menuSection::getConfigurationSection)
@@ -71,7 +72,6 @@ public class InventoryClickListener implements Listener {
                 .ifPresent(milestoneConfig -> {
                     try {
                         int requiredVotes = milestoneConfig.getInt("required-votes");
-                        int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
                         int milestoneIndex = Integer.parseInt(milestoneConfig.getName().substring(1));
                         boolean isClaimed = plugin.getVoteStorage().isMilestoneClaimed(playerUUID, milestoneIndex);
                         if (isClaimed) {
@@ -123,6 +123,8 @@ public class InventoryClickListener implements Listener {
         int clickedSlot = event.getSlot();
         if (clickedSlot < 0) return;
 
+        int playerStreaks = plugin.getVoteStorage().getPlayerStreak(playerUUID);
+
         streakMenuSection.getKeys(false).stream()
                 .map(streakMenuSection::getConfigurationSection)
                 .filter(Objects::nonNull)
@@ -130,7 +132,6 @@ public class InventoryClickListener implements Listener {
                 .findFirst()
                 .ifPresent(streakConfig -> {
                     int requiredStreaks = streakConfig.getInt("streak-required");
-                    int playerStreaks = plugin.getVoteStorage().getPlayerStreak(playerUUID);
                     int streakIndex = Integer.parseInt(streakConfig.getName().substring(1));
                     boolean isClaimed = plugin.getVoteStorage().isStreakClaimed(playerUUID, streakIndex);
                     if (isClaimed) {

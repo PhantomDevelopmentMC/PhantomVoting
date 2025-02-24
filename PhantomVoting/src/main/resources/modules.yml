@@ -8,3 +8,16 @@ Modules:
     Enabled: false
   Streaks-Menu:
     Enabled: false
+
+
+Module-Permissions:
+  Enabled: false
+  Modules:
+    Bossbar:
+      Permission: "phantomvote.bossbar"
+    VoteReminder:
+      Permission: "phantomvote.votereminder"
+    Milestones:
+      Permission: "phantomvote.milestones"
+    Streaks:
+      Permission: "phantomvote.streaks"

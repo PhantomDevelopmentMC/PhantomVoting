@@ -29,11 +29,8 @@ public class PlaceholderManager extends PlaceholderExpansion {
      */
     @Override
     public boolean register() {
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eRegistered &fPlaceholder-API &eplaceholder(s)."));
-            return super.register();
-        }
-        return false;
+        Bukkit.getLogger().info(ConsoleUtil.translateColors("&6[&e!&6] &eRegistered &fPlaceholder-API &eplaceholder(s)."));
+        return super.register();
     }
     /**
      * Gets the plugin identifier.

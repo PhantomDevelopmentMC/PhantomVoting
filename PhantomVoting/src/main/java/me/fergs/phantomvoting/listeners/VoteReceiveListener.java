@@ -9,13 +9,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * A listener for handling vote events.
  */
 public class VoteReceiveListener implements Listener {
+
+    final Random random = new Random();
+
     /**
      * Handles a vote event.
      *
@@ -23,17 +27,16 @@ public class VoteReceiveListener implements Listener {
      */
     @EventHandler
     public void onVoteReceive(VotifierEvent event) {
-        String playerName = event.getVote().getUsername();
-        Player player = Bukkit.getPlayer(playerName);
+        final String playerName = event.getVote().getUsername();
+        final Player player = Bukkit.getPlayer(playerName);
         if (player == null) return;
 
-        UUID playerUUID = player.getUniqueId();
-        PhantomVoting.getInstance().getVoteStorage().addVote(playerUUID);
+        PhantomVoting.getInstance().getVoteStorage().addVote(player.getUniqueId());
 
         PhantomVoting.getInstance().getMessageManager().broadcastMessage("VOTE_RECEIVED", "%player%", playerName);
 
-        List<String> defaultCommands = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getStringList("Rewards.Default.Commands");
-        for (String command : defaultCommands) {
+        final Set<String> defaultCommands = new HashSet<>(PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getStringList("Rewards.Default.Commands"));
+        for (final String command : defaultCommands) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));
         }
 
@@ -45,9 +48,9 @@ public class VoteReceiveListener implements Listener {
             }
         }
 
-        ConfigurationSection voteRewardsSection = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getConfigurationSection("Rewards.VoteRewards");
+        final ConfigurationSection voteRewardsSection = PhantomVoting.getInstance().getConfigurationManager().getConfig("config").getConfigurationSection("Rewards.VoteRewards");
         if (voteRewardsSection != null) {
-            for (String rewardKey : voteRewardsSection.getKeys(false)) {
+            for (final String rewardKey : voteRewardsSection.getKeys(false)) {
                 ConfigurationSection rewardSection = voteRewardsSection.getConfigurationSection(rewardKey);
                 assert rewardSection != null;
                 boolean hasPermissionString = rewardSection.contains("Permission");
@@ -55,9 +58,9 @@ public class VoteReceiveListener implements Listener {
                 if (hasPermissionString && !player.hasPermission(rewardSection.getString("Permission", "phantomvoting.default"))) {
                     continue;
                 }
-                if (Math.random() * 100 <= chance) {
-                    List<String> rewardCommands = rewardSection.getStringList("Commands");
-                    for (String command : rewardCommands) {
+                if (random.nextInt(100) + 1 <= chance) {
+                    final Set<String> rewardCommands = new HashSet<>(rewardSection.getStringList("Commands"));
+                    for (final String command : rewardCommands) {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));
                     }
                 }

@@ -79,6 +79,14 @@ Messages:
       Enable: true
       Value: '&4&l[&c&l!&4&l] &cHey! This is currently disabled or undergoing maintenance.'
 
+  NO_PERMISSION:
+    Sound:
+      Enable: true
+      Value: ENTITY_BAT_TAKEOFF;1.0;1.0
+    Message:
+      Enable: true
+      Value: '&4&l[&c&l!&4&l] &cYou do not have permission to execute this command.'
+
   VOTE_REMINDER_TOGGLE:
     Sound:
       Enable: true
@@ -138,11 +146,11 @@ Messages:
         - '                 &6&lVote Sites'
         - '     &7&o Vote on these sites to receive rewards!'
         - ' '
-        - ' &f&l→ &eVote Link &6#1'
-        - ' &f&l→ &eVote Link &6#2'
-        - ' &f&l→ &eVote Link &6#3'
-        - ' &f&l→ &eVote Link &6#4'
-        - ' &f&l→ &eVote Link &6#5'
+        - ' &f&l→ &eVote Link &6#1 (Click Me)[https://en.wikipedia.org/wiki/Terry_A._Davis]'
+        - ' &f&l→ &eVote Link &6#2 (Click Me)[https://en.wikipedia.org/wiki/Terry_A._Davis]'
+        - ' &f&l→ &eVote Link &6#3 (Click Me)[https://en.wikipedia.org/wiki/Terry_A._Davis]'
+        - ' &f&l→ &eVote Link &6#4 (Click Me)[https://en.wikipedia.org/wiki/Terry_A._Davis]'
+        - ' &f&l→ &eVote Link &6#5 (Click Me)[https://en.wikipedia.org/wiki/Terry_A._Davis]'
         - ' '
         - ' &f&l→ &eCurrent Votes: &6%daily_votes%'
         - ' '

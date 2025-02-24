@@ -1,14 +1,14 @@
 package me.fergs.phantomvoting.managers;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.fergs.phantomvoting.PhantomVoting;
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class PlayerManager<T extends PhantomVoting> {
     private final T plugin;
-    private final Set<Player> players = new HashSet<>();
+    private final Set<Player> players = new ObjectOpenHashSet<>();
     /**
      * Constructs a PlayerManager for managing players.
      *

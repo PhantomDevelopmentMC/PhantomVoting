@@ -28,6 +28,12 @@ public class PlayerCommands{
                                 plugin.getMessageManager().sendMessage(player, "MODULE_DISABLED");
                                 return;
                             }
+                            if (plugin.getConfigurationManager().getConfig("modules").getBoolean("Module-Permissions.Enabled", false)) {
+                                if (!player.hasPermission(plugin.getConfigurationManager().getConfig("modules").getString("Module-Permissions.Modules.Milestones.Permission", "phantomvoting.milestones"))) {
+                                    plugin.getMessageManager().sendMessage(player, "NO_PERMISSION");
+                                    return;
+                                }
+                            }
                             player.openInventory(plugin.getMilestonesInventory().createInventory(player));
                         })
                 )
@@ -37,6 +43,12 @@ public class PlayerCommands{
                                 plugin.getMessageManager().sendMessage(player, "MODULE_DISABLED");
                                 return;
                             }
+                        if (plugin.getConfigurationManager().getConfig("modules").getBoolean("Module-Permissions.Enabled", false)) {
+                            if (!player.hasPermission(plugin.getConfigurationManager().getConfig("modules").getString("Module-Permissions.Modules.Streaks.Permission", "phantomvoting.streaks"))) {
+                                plugin.getMessageManager().sendMessage(player, "NO_PERMISSION");
+                                return;
+                            }
+                        }
                             player.openInventory(plugin.getStreaksInventory().createInventory(player));
                         })
                 )
@@ -55,7 +67,6 @@ public class PlayerCommands{
                                         plugin.getMessageManager().sendMessage(player, "VOTE_REMINDER_TOGGLE", "%status%", "enabled");
                                     }
                                     else {
-
                                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.getConfigurationManager().getConfig("modules/vote_reminder").getString("Permission-Settings.Remove-Permission-Command", "this should be a command")
                                                 .replace("%player%", player.getName()));
 

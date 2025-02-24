@@ -1,0 +1,7 @@
+Storage-Settings:
+  type: "SQLITE" #SQL, SQLITE (SQLITE is recommended for small/medium servers & non-networked servers)
+  host: "" #SQL (Case sensitive)
+  username: "" #SQL (Case sensitive)
+  password: "" #SQL (Case sensitive)
+  port: "" #SQL (Default is 3306)
+  database: "" #SQL (Case sensitive)
