@@ -44,7 +44,7 @@ public class PlayerCommands{
                                 return;
                             }
                         if (plugin.getConfigurationManager().getConfig("modules").getBoolean("Module-Permissions.Enabled", false)) {
-                            if (!player.hasPermission(plugin.getConfigurationManager().getConfig("modoules").getString("Module-Permissions.Modules.Streaks.Permission", "phantomvoting.streaks"))) {
+                            if (!player.hasPermission(plugin.getConfigurationManager().getConfig("modules").getString("Module-Permissions.Modules.Streaks.Permission", "phantomvoting.streaks"))) {
                                 plugin.getMessageManager().sendMessage(player, "NO_PERMISSION");
                                 return;
                             }
