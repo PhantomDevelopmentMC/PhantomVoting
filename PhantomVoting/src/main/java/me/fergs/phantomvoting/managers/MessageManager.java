@@ -85,8 +85,7 @@ public class MessageManager<T extends PhantomVoting> {
                 player.sendMessage(messageComponent);
             } catch (NoSuchMethodError e) {
                 // this means the server is running a version of Spigot that doesn't support hex colors or components
-                String legacyMessage = legacySerializer.serialize(messageComponent);
-                player.sendMessage(legacyMessage);
+                player.sendMessage(processedLine);
             }
         }
     }
