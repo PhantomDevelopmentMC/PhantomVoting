@@ -44,13 +44,13 @@ public class MessageManager<T extends PhantomVoting> {
                 } else {
                     message.get().forEach(line -> {
                         String formattedMessage = MessageParser.parse(line, placeholders);
-                        executor.sendMessage(Component.text(Color.hex(PlaceholderAPI.setPlaceholders(player, formattedMessage))));
+                        executor.sendMessage(Color.hex(PlaceholderAPI.setPlaceholders(player, formattedMessage)));
                     });
                 }
             } else {
                 message.get().forEach(line -> {
                     String formattedMessage = MessageParser.parse(line, placeholders);
-                    executor.sendMessage(Component.text(Color.hex(formattedMessage)));
+                    executor.sendMessage(Color.hex(formattedMessage));
                 });
             }
         }
@@ -68,10 +68,12 @@ public class MessageManager<T extends PhantomVoting> {
             playSound((Player) executor, sound.get());
         }
     }
-
     /**
-     * Processes and sends vote messages to the player.
-     * It supports clickable links in the format (Click Me)[URL].
+     * Sends a vote message to the player with clickable links.
+     *
+     * @param player The player to send the message to.
+     * @param lines The lines of the message.
+     * @param placeholders The placeholders to replace in the message.
      */
     private void sendVoteMessage(Player player, List<String> lines, String... placeholders) {
         LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.builder().hexColors().build();
@@ -79,7 +81,13 @@ public class MessageManager<T extends PhantomVoting> {
             if (line.isEmpty()) continue;
             String processedLine = Color.hex(PlaceholderAPI.setPlaceholders(player, MessageParser.parse(line, placeholders)));
             Component messageComponent = parseLine(processedLine, legacySerializer);
-            player.sendMessage(messageComponent);
+            try {
+                player.sendMessage(messageComponent);
+            } catch (NoSuchMethodError e) {
+                // this means the server is running a version of Spigot that doesn't support hex colors or components
+                String legacyMessage = legacySerializer.serialize(messageComponent);
+                player.sendMessage(legacyMessage);
+            }
         }
     }
     /**
@@ -129,7 +137,7 @@ public class MessageManager<T extends PhantomVoting> {
         if (message.isPresent() && isMessageEnabled(key)) {
             message.get().forEach(line -> {
                 String formattedMessage = MessageParser.parse(line, placeholders);
-                Bukkit.getServer().broadcast(Component.text(Color.hex(PlaceholderAPI.setPlaceholders(null, formattedMessage))));
+                Bukkit.getServer().broadcastMessage(Color.hex(PlaceholderAPI.setPlaceholders(null, formattedMessage)));
             });
         }
 
