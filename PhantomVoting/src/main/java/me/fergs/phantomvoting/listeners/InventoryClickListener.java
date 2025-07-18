@@ -6,6 +6,7 @@ import me.fergs.phantomvoting.inventories.holders.MilestonesInventoryHolder;
 import me.fergs.phantomvoting.inventories.holders.StreaksInventoryHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,18 +47,23 @@ public class InventoryClickListener implements Listener {
      */
     private void handleMilestoneClick(InventoryClickEvent event) {
         if (!(event.getInventory().getHolder() instanceof MilestonesInventoryHolder)) return;
-        MilestonesInventoryHolder holder = (MilestonesInventoryHolder)event.getInventory().getHolder();
-        final Player player = (Player)event.getWhoClicked();
-
-        if (event.getSlot() == PhantomVoting.getInstance().getMilestonesInventory().getPrevSlot() && holder.getPage() > 1){
-            PhantomVoting.getInstance().getMilestonesInventory().open(player, holder.getPage() - 1);
-        }
-        if (event.getSlot() == PhantomVoting.getInstance().getMilestonesInventory().getNextSlot() && holder.getPage() < 1000){
-            PhantomVoting.getInstance().getMilestonesInventory().open(player, holder.getPage() + 1);
-        }
 
         ItemStack clickedItem = event.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
+
+        event.setCancelled(true);
+
+        MilestonesInventoryHolder holder = (MilestonesInventoryHolder)event.getInventory().getHolder();
+        final Player player = (Player)event.getWhoClicked();
+
+        if (event.getSlot() == PhantomVoting.getInstance().getMilestonesInventory().getPrevSlot() && holder.getPage() > 1) {
+            PhantomVoting.getInstance().getMilestonesInventory().open(player, holder.getPage() - 1);
+            player.playSound(player, Sound.BLOCK_LEVER_CLICK, 0.7f, 0.5f);
+        }
+        if (event.getSlot() == PhantomVoting.getInstance().getMilestonesInventory().getNextSlot() && holder.getPage() <= PhantomVoting.getInstance().getMilestonesInventory().getMaxPage()) {
+            PhantomVoting.getInstance().getMilestonesInventory().open(player, holder.getPage() + 1);
+            player.playSound(player, Sound.BLOCK_LEVER_CLICK, 0.7f, 0.5f);
+        }
 
         UUID playerUUID = player.getUniqueId();
         PhantomVoting plugin = PhantomVoting.getInstance();
@@ -75,6 +81,7 @@ public class InventoryClickListener implements Listener {
         menuSection.getKeys(false).stream()
                 .map(menuSection::getConfigurationSection)
                 .filter(Objects::nonNull)
+                .filter( milestoneConfig -> milestoneConfig.getInt("page", 1) == holder.getPage())
                 .filter(milestoneConfig -> milestoneConfig.getInt("slot", -1) == clickedSlot)
                 .findFirst()
                 .ifPresent(milestoneConfig -> {
@@ -113,11 +120,24 @@ public class InventoryClickListener implements Listener {
      * @param event The InventoryClickEvent.
      */
     private void handleStreakClick(InventoryClickEvent event) {
-        event.setCancelled(true);
+        if (!(event.getInventory().getHolder() instanceof StreaksInventoryHolder)) return;
 
-        Player player = (Player) event.getWhoClicked();
         ItemStack clickedItem = event.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
+
+        event.setCancelled(true);
+
+        StreaksInventoryHolder holder = (StreaksInventoryHolder)event.getInventory().getHolder();
+        final Player player = (Player)event.getWhoClicked();
+
+        if (event.getSlot() == PhantomVoting.getInstance().getStreaksInventory().getPrevSlot() && holder.getPage() > 1) {
+            PhantomVoting.getInstance().getStreaksInventory().open(player, holder.getPage() - 1);
+            player.playSound(player, Sound.BLOCK_LEVER_CLICK, 0.7f, 0.5f);
+        }
+        if (event.getSlot() == PhantomVoting.getInstance().getStreaksInventory().getNextSlot() && holder.getPage() <= PhantomVoting.getInstance().getStreaksInventory().getMaxPage()) {
+            PhantomVoting.getInstance().getStreaksInventory().open(player, holder.getPage() + 1);
+            player.playSound(player, Sound.BLOCK_LEVER_CLICK, 0.7f, 0.5f);
+        }
 
         UUID playerUUID = player.getUniqueId();
         PhantomVoting plugin = PhantomVoting.getInstance();
@@ -136,6 +156,7 @@ public class InventoryClickListener implements Listener {
         streakMenuSection.getKeys(false).stream()
                 .map(streakMenuSection::getConfigurationSection)
                 .filter(Objects::nonNull)
+                .filter(streakConfig -> streakConfig.getInt("page", 1) == holder.getPage())
                 .filter(streakConfig -> streakConfig.getInt("slot", -1) == clickedSlot)
                 .findFirst()
                 .ifPresent(streakConfig -> {

@@ -32,6 +32,8 @@ public class MilestonesInventory implements InventoryInterface {
     private ItemStack prevPageItem;
     private int NEXT_SLOT;
     private int PREV_SLOT;
+    private boolean isPagesEnabled;
+    private int maxPage;
 
     public MilestonesInventory(PhantomVoting plugin) {
         this.plugin = plugin;
@@ -43,22 +45,10 @@ public class MilestonesInventory implements InventoryInterface {
         this.inventorySize = config.getInt("Milestones.size", 27);
         this.inventoryTitle = Color.hex(config.getString("Milestones.title", "&8Vote Milestones"));
 
-        ConfigurationSection fillSec = config.getConfigurationSection("Milestones.filler");
-        if (fillSec != null) {
-            for (String key : fillSec.getKeys(false)) {
-                ConfigurationSection s = fillSec.getConfigurationSection(key);
-                ItemStack item = ItemBuilder.create(Material.valueOf(s.getString("material", "GRAY_STAINED_GLASS_PANE")))
-                        .setName(Color.hex(s.getString("name", "&8")))
-                        .setLore(Color.hexList(s.getStringList("lore")))
-                        .setCustomModelData(s.getInt("custom-model-data", 0))
-                        .setItemAmount(s.getInt("item-amount", 1))
-                        .setGlowing(s.getBoolean("glowing", false))
-                        .build();
-                fillers.add(new InventoryFiller(item, InventoryUtil.parseSlotRanges(s.getStringList("slots"))));
-            }
-        }
+        loadFillers();
 
         ConfigurationSection pages = config.getConfigurationSection("Milestones.settings.pages");
+        this.isPagesEnabled = pages != null && pages.getBoolean("enabled", false);
         this.prevPageItem = buildButton(pages.getConfigurationSection("previous-page-item"));
         this.nextPageItem = buildButton(pages.getConfigurationSection("next-page-item"));
         this.PREV_SLOT = pages.getConfigurationSection("previous-page-item").getInt("slot");
@@ -90,7 +80,7 @@ public class MilestonesInventory implements InventoryInterface {
         UUID playerUUID = player.getUniqueId();
         ConfigurationSection menuSec = config.getConfigurationSection("Milestones.menu");
 
-        int maxPage = menuSec.getKeys(false)
+        maxPage = menuSec.getKeys(false)
                 .stream()
                 .map(k -> menuSec.getConfigurationSection(k).getInt("page",1))
                 .max(Integer::compareTo).orElse(1);
@@ -99,13 +89,13 @@ public class MilestonesInventory implements InventoryInterface {
                 .replace("%page%", String.valueOf(currentPage))
                 .replace("%max%",  String.valueOf(maxPage));
 
-        Inventory inv = Bukkit.createInventory(new MilestonesInventoryHolder(1), inventorySize, Color.hex(title));
+        Inventory inv = Bukkit.createInventory(new MilestonesInventoryHolder(currentPage), inventorySize, Color.hex(title));
 
-        fillers.forEach(f ->
-                f.getSlots().forEach(range ->
-                        range.forEach(idx -> inv.setItem(idx, f.getItem()))
-                )
-        );
+        fillers.stream()
+                .filter(f -> f.getPage() == currentPage)
+                .forEach(filler -> filler.getSlots().forEach(range ->
+                        range.forEach(idx -> inv.setItem(idx, filler.getItem()))
+                ));
 
         List<Runnable> tasks = new ArrayList<>();
         int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
@@ -130,8 +120,10 @@ public class MilestonesInventory implements InventoryInterface {
             }
         }
 
-        if (currentPage > 1) inv.setItem(PREV_SLOT, prevPageItem);
-        if (currentPage < maxPage) inv.setItem(NEXT_SLOT, nextPageItem);
+        if (isPagesEnabled) {
+            inv.setItem(PREV_SLOT, prevPageItem);
+            inv.setItem(NEXT_SLOT, nextPageItem);
+        }
 
         boolean useDelay = config.getBoolean("Milestones.settings.use-delay", false);
         long delayTicks = config.getLong("Milestones.settings.delay-ticks", 10L);
@@ -169,6 +161,7 @@ public class MilestonesInventory implements InventoryInterface {
                 boolean isGlowing = fillerConfig.getBoolean("glowing", false);
                 List<String> lore = fillerConfig.getStringList("lore");
                 List<String> slotRanges = fillerConfig.getStringList("slots");
+                int page = fillerConfig.getInt("page", 1);
 
                 ItemStack fillerItem = ItemBuilder.create(Material.valueOf(material))
                         .setName(name)
@@ -179,7 +172,7 @@ public class MilestonesInventory implements InventoryInterface {
                         .build();
 
                 List<List<Integer>> slots = InventoryUtil.parseSlotRanges(slotRanges);
-                fillers.add(new InventoryFiller(fillerItem, slots));
+                fillers.add(new InventoryFiller(fillerItem, page, slots));
             }
         }
     }
@@ -231,5 +224,9 @@ public class MilestonesInventory implements InventoryInterface {
 
     public int getNextSlot() {
         return NEXT_SLOT;
+    }
+
+    public int getMaxPage() {
+        return maxPage;
     }
 }
