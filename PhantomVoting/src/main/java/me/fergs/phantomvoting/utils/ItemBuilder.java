@@ -18,7 +18,7 @@ public class ItemBuilder {
      *
      * @param material The material of the item.
      */
-    private ItemBuilder(Material material) {
+    public ItemBuilder(Material material) {
         this.item = new ItemStack(material);
         this.meta = item.getItemMeta();
     }

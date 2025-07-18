@@ -21,99 +21,136 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class MilestonesInventory<T extends PhantomVoting> implements InventoryInterface {
 
-    private final T plugin;
+public class MilestonesInventory implements InventoryInterface {
+    private final PhantomVoting plugin;
+    private YamlConfigFile config;
     private int inventorySize;
     private String inventoryTitle;
     private List<InventoryFiller> fillers = new ArrayList<>();
-    private YamlConfigFile config;
-    /**
-     * Creates a new milestones inventory.
-     *
-     * @param plugin The plugin instance.
-     */
-    public MilestonesInventory(T plugin) {
+    private ItemStack nextPageItem;
+    private ItemStack prevPageItem;
+    private int NEXT_SLOT;
+    private int PREV_SLOT;
+
+    public MilestonesInventory(PhantomVoting plugin) {
         this.plugin = plugin;
-        loadConfig();
+        cache();
     }
-    /**
-     * Loads the configuration.
-     */
-    private void loadConfig() {
-        config = plugin.getConfigurationManager().getConfig("menus/milestones");
+
+    public void cache() {
+        this.config = plugin.getConfigurationManager().getConfig("menus/milestones");
         this.inventorySize = config.getInt("Milestones.size", 27);
         this.inventoryTitle = Color.hex(config.getString("Milestones.title", "&8Vote Milestones"));
 
-        loadFillers();
+        ConfigurationSection fillSec = config.getConfigurationSection("Milestones.filler");
+        if (fillSec != null) {
+            for (String key : fillSec.getKeys(false)) {
+                ConfigurationSection s = fillSec.getConfigurationSection(key);
+                ItemStack item = ItemBuilder.create(Material.valueOf(s.getString("material", "GRAY_STAINED_GLASS_PANE")))
+                        .setName(Color.hex(s.getString("name", "&8")))
+                        .setLore(Color.hexList(s.getStringList("lore")))
+                        .setCustomModelData(s.getInt("custom-model-data", 0))
+                        .setItemAmount(s.getInt("item-amount", 1))
+                        .setGlowing(s.getBoolean("glowing", false))
+                        .build();
+                fillers.add(new InventoryFiller(item, InventoryUtil.parseSlotRanges(s.getStringList("slots"))));
+            }
+        }
+
+        ConfigurationSection pages = config.getConfigurationSection("Milestones.settings.pages");
+        this.prevPageItem = buildButton(pages.getConfigurationSection("previous-page-item"));
+        this.nextPageItem = buildButton(pages.getConfigurationSection("next-page-item"));
+        this.PREV_SLOT = pages.getConfigurationSection("previous-page-item").getInt("slot");
+        this.NEXT_SLOT = pages.getConfigurationSection("next-page-item").getInt("slot");
     }
-    /**
-     * Creates the inventory for the player.
-     *
-     * @param player The player to create the inventory for.
-     * @return The inventory.
-     */
+
+    private ItemStack buildButton(ConfigurationSection sec) {
+        if (sec == null) return new ItemStack(Material.AIR);
+        Material mat = Material.valueOf(sec.getString("material","ARROW"));
+        return new ItemBuilder(mat)
+                .setName(Color.hex(sec.getString("name","")))
+                .setLore(Color.hexList(sec.getStringList("lore")))
+                .build();
+    }
+
+    /** Call this to open page #page for the player. */
+    public void open(Player player, int page) {
+        player.openInventory(createInventory(player, page));
+    }
+
     @Override
     public Inventory createInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(new MilestonesInventoryHolder(inventoryTitle), inventorySize, inventoryTitle);
-        UUID playerUUID = player.getUniqueId();
+        // default to page 1 if someone calls this
+        return createInventory(player, 1);
+    }
 
-        fillers.forEach(filler ->
-                filler.getSlots().forEach(slots ->
-                        slots.forEach(slot -> inventory.setItem(slot, filler.getItem()))
+    /** Internal: builds the inventory for a given page. */
+    private Inventory createInventory(Player player, int currentPage) {
+        UUID playerUUID = player.getUniqueId();
+        ConfigurationSection menuSec = config.getConfigurationSection("Milestones.menu");
+
+        int maxPage = menuSec.getKeys(false)
+                .stream()
+                .map(k -> menuSec.getConfigurationSection(k).getInt("page",1))
+                .max(Integer::compareTo).orElse(1);
+
+        String title = inventoryTitle
+                .replace("%page%", String.valueOf(currentPage))
+                .replace("%max%",  String.valueOf(maxPage));
+
+        Inventory inv = Bukkit.createInventory(new MilestonesInventoryHolder(1), inventorySize, Color.hex(title));
+
+        fillers.forEach(f ->
+                f.getSlots().forEach(range ->
+                        range.forEach(idx -> inv.setItem(idx, f.getItem()))
                 )
         );
 
-        ConfigurationSection menuSection = config.getConfigurationSection("Milestones.menu");
-        if (menuSection == null) return inventory;
+        List<Runnable> tasks = new ArrayList<>();
+        int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
 
-        boolean delayEnabled = config.getBoolean("Milestones.settings.use-delay", false);
+        for (String key : menuSec.getKeys(false)) {
+            ConfigurationSection ms = menuSec.getConfigurationSection(key);
+            int page = ms.getInt("page",1);
+            if (page != currentPage) continue;
+
+            int required = ms.getInt("required-votes");
+            boolean claimed = plugin.getVoteStorage()
+                    .isMilestoneClaimed(playerUUID, Integer.parseInt(key.substring(1)));
+            String state = claimed ? "Claimed"
+                    : (playerVotes >= required ? "Available" : "Locked");
+            ConfigurationSection itemSec = ms.getConfigurationSection(state);
+            if (itemSec == null) continue;
+
+            ItemStack item = loadItem(itemSec, required);
+            int slot = ms.getInt("slot", -1);
+            if (slot >= 0 && slot < inventorySize) {
+                tasks.add(() -> inv.setItem(slot, item));
+            }
+        }
+
+        if (currentPage > 1) inv.setItem(PREV_SLOT, prevPageItem);
+        if (currentPage < maxPage) inv.setItem(NEXT_SLOT, nextPageItem);
+
+        boolean useDelay = config.getBoolean("Milestones.settings.use-delay", false);
         long delayTicks = config.getLong("Milestones.settings.delay-ticks", 10L);
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            List<Runnable> tasks = new ArrayList<>();
-            int playerVotes = plugin.getVoteStorage().getPlayerVoteCount(playerUUID, "all_time");
-            for (String key : menuSection.getKeys(false)) {
-                ConfigurationSection milestoneConfig = menuSection.getConfigurationSection(key);
-                int requiredVotes = milestoneConfig.getInt("required-votes");
-                boolean isClaimed = plugin.getVoteStorage().isMilestoneClaimed(playerUUID, Integer.parseInt(key.substring(1)));
-
-                ItemStack item;
-                if (isClaimed) {
-                    item = loadItem(milestoneConfig.getConfigurationSection("Claimed"), requiredVotes);
-                } else if (playerVotes >= requiredVotes) {
-                    item = loadItem(milestoneConfig.getConfigurationSection("Available"), requiredVotes);
-                } else {
-                    item = loadItem(milestoneConfig.getConfigurationSection("Locked"), requiredVotes);
+        if (useDelay) {
+            new BukkitRunnable() {
+                int i = 0;
+                @Override public void run() {
+                    if (i >= tasks.size()) { cancel(); return; }
+                    tasks.get(i++).run();
                 }
+            }.runTaskTimerAsynchronously(plugin, 0, delayTicks);
+        } else {
+            tasks.forEach(Runnable::run);
+        }
 
-                int slot = milestoneConfig.getInt("slot", -1);
-                if (slot >= 0 && slot < inventory.getSize()) {
-                    tasks.add(() -> inventory.setItem(slot, item));
-                }
-            }
-
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                if (delayEnabled) {
-                    new BukkitRunnable() {
-                        private int index = 0;
-                        @Override
-                        public void run() {
-                            if (index >= tasks.size()) {
-                                cancel();
-                                return;
-                            }
-                            tasks.get(index).run();
-                            index++;
-                        }
-                    }.runTaskTimerAsynchronously(plugin, 0, delayTicks);
-                } else {
-                    tasks.forEach(Runnable::run);
-                }
-            });
-        });
-        return inventory;
+        return inv;
     }
+
     /**
      * Loads the fillers.
      */
@@ -179,6 +216,20 @@ public class MilestonesInventory<T extends PhantomVoting> implements InventoryIn
      */
     @Override
     public void reloadInventory() {
-        loadConfig();
+        fillers.clear();
+        cache();
+        for (Player player : plugin.getPlayerManager().getPlayers()) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof MilestonesInventoryHolder) {
+                open(player, 1);
+            }
+        }
+    }
+
+    public int getPrevSlot() {
+        return PREV_SLOT;
+    }
+
+    public int getNextSlot() {
+        return NEXT_SLOT;
     }
 }

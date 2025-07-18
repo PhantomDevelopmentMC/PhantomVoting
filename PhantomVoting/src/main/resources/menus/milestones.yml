@@ -12,6 +12,20 @@ Milestones:
   settings:
     use-delay: false # This is an animation, where each milestone (not filler) will be displayed one by one, causing a sequenced effect.
     delay-ticks: 10
+    pages:
+      next-page-item:
+        material: "ARROW"
+        name: "&e&lNext Page"
+        lore:
+          - "&7&oClick to go to the next page."
+        slot: 51
+
+      previous-page-item:
+        material: "ARROW"
+        name: "&e&lPrevious Page"
+        lore:
+          - "&7&oClick to go to the previous page."
+        slot: 49
   menu:
     "#1":
         required-votes: 10

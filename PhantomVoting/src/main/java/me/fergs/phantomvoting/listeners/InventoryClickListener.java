@@ -45,9 +45,17 @@ public class InventoryClickListener implements Listener {
      * @param event The InventoryClickEvent.
      */
     private void handleMilestoneClick(InventoryClickEvent event) {
-        event.setCancelled(true);
+        if (!(event.getInventory().getHolder() instanceof MilestonesInventoryHolder)) return;
+        MilestonesInventoryHolder holder = (MilestonesInventoryHolder)event.getInventory().getHolder();
+        final Player player = (Player)event.getWhoClicked();
 
-        Player player = (Player) event.getWhoClicked();
+        if (event.getSlot() == PhantomVoting.getInstance().getMilestonesInventory().getPrevSlot() && holder.getPage() > 1){
+            PhantomVoting.getInstance().getMilestonesInventory().open(player, holder.getPage() - 1);
+        }
+        if (event.getSlot() == PhantomVoting.getInstance().getMilestonesInventory().getNextSlot() && holder.getPage() < 1000){
+            PhantomVoting.getInstance().getMilestonesInventory().open(player, holder.getPage() + 1);
+        }
+
         ItemStack clickedItem = event.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
