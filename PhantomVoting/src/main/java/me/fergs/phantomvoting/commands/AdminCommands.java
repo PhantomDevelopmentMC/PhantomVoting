@@ -162,6 +162,17 @@ public class AdminCommands {
                             }
                         })
                 )
+                .withSubcommand(new CommandAPICommand("sendvotelist")
+                        .withArguments(new PlayerArgument("player"))
+                        .executes((player, args) -> {
+                                Player target = (Player) args.get("player");
+                                assert target != null;
+
+                                 plugin.getMessageManager().sendMessage(target, "VOTE_LIST",
+                                    "%daily_votes%", String.valueOf(plugin.getVoteStorage().getPlayerVoteCount(target.getUniqueId(), "daily")));
+                        })
+                )
+
                 .register();
     }
 }

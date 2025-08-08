@@ -121,32 +121,42 @@ public class LeaderboardInventory<T extends PhantomVoting> implements InventoryI
      * @return The player item.
      */
     private ItemStack createPlayerItem(PlayerVoteData playerData) {
-        String playerName = getPlayerName(playerData.getUuid());
-        int playerPosition = cachedTopPlayers.indexOf(playerData) + 1;
-        int votes = playerData.getVoteCount();
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
-        if (skullMeta != null) {
-            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerData.getUuid()));
+        UUID uuid = playerData.getUuid();
+        String playerName = getPlayerName(uuid);
+        int position = cachedTopPlayers.indexOf(playerData) + 1;
+        int votes    = playerData.getVoteCount();
 
-            String displayName = Color.hex(config.getString("Leaderboard.player-head.name",
-                            "&6&l[&e&l!&6&l] &e%player% &8(&7#%position%&8)")
-                    .replace("%player%", playerName)
-                    .replace("%position%", String.valueOf(playerPosition))
-                    .replace("%votes%", String.valueOf(votes)));
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        if (meta == null) return head;
 
-            List<String> lore = config.getStringList("Leaderboard.player-head.lore").stream()
-                    .map(line -> Color.hex(line
-                            .replace("%player%", playerName)
-                            .replace("%position%", String.valueOf(playerPosition))
-                            .replace("%votes%", String.valueOf(votes))))
-                    .collect(Collectors.toList());
-
-            skullMeta.setDisplayName(displayName);
-            skullMeta.setLore(lore);
-            item.setItemMeta(skullMeta);
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(uuid);
+        String name = offline.getName();
+        if (name == null || name.isEmpty()) {
+            meta.setOwner("Steve");
+        } else {
+            meta.setOwningPlayer(offline);
         }
-        return item;
+
+        String display = Color.hex(config.getString("Leaderboard.player-head.name",
+                        "&6&l[&e&l!&6&l] &e%player% &8(&7#%position%&8)")
+                .replace("%player%",  playerName)
+                .replace("%position%", String.valueOf(position))
+                .replace("%votes%",    String.valueOf(votes))
+        );
+        meta.setDisplayName(display);
+
+        List<String> lore = config.getStringList("Leaderboard.player-head.lore").stream()
+                .map(line -> Color.hex(line
+                        .replace("%player%",  playerName)
+                        .replace("%position%", String.valueOf(position))
+                        .replace("%votes%",    String.valueOf(votes))
+                ))
+                .collect(Collectors.toList());
+        meta.setLore(lore);
+
+        head.setItemMeta(meta);
+        return head;
     }
     /**
      * Loads the fillers from the configuration.

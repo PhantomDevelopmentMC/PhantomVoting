@@ -33,8 +33,8 @@ public final class PhantomVoting extends JavaPlugin {
     private PlayerManager<PhantomVoting> playerManager;
     private LeaderboardInventory<PhantomVoting> leaderboardInventory;
     private VoteReminderManager<PhantomVoting> voteReminderManager;
-    private MilestonesInventory<PhantomVoting> milestonesInventory;
-    private StreaksInventory<PhantomVoting> streaksInventory;
+    private MilestonesInventory milestonesInventory;
+    private StreaksInventory streaksInventory;
     /**
      * Called when the plugin is loaded.
      * This is where we register the Command API if it is not already loaded.
@@ -100,11 +100,11 @@ public final class PhantomVoting extends JavaPlugin {
             voteReminderManager.reloadTask("VoteReminder");
         }
         if (configurationManager.isModuleEnabled("Milestones")) {
-            milestonesInventory = new MilestonesInventory<>(this);
+            milestonesInventory = new MilestonesInventory(this);
         }
 
         if (configurationManager.isModuleEnabled("Streaks-Menu")) {
-            streaksInventory = new StreaksInventory<>(this);
+            streaksInventory = new StreaksInventory(this);
         }
 
         new Metrics(this, 23888);
@@ -207,7 +207,7 @@ public final class PhantomVoting extends JavaPlugin {
      *
      * @return the milestones inventory
      */
-    public MilestonesInventory<PhantomVoting> getMilestonesInventory() {
+    public MilestonesInventory getMilestonesInventory() {
         return milestonesInventory;
     }
     /**
@@ -215,7 +215,7 @@ public final class PhantomVoting extends JavaPlugin {
      *
      * @return the streaks inventory
      */
-    public StreaksInventory<PhantomVoting> getStreaksInventory() {
+    public StreaksInventory getStreaksInventory() {
         return streaksInventory;
     }
 }

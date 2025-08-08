@@ -2,6 +2,8 @@ package me.fergs.phantomvoting.utils;
 
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,5 +25,13 @@ public class Color {
             message = message.replace(hexCode, builder.toString());
         }
         return ChatColor.translateAlternateColorCodes('&', message).replace('&', '§');
+    }
+
+    public static List<String> hexList(List<String> messages) {
+        List<String> list = new ArrayList<>();
+        for (String message : messages) {
+            list.add(hex(message));
+        }
+        return list;
     }
 }
