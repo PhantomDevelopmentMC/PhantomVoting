@@ -392,27 +392,28 @@ public class VoteStorage {
 
         currentGlobalVoteCount.set(count);
     }
-    /**
-     * Saves the current global vote count to the database.
-     */
     public void saveCurrentGlobalVoteCount() {
-        String updateSQL = "UPDATE vote_party SET current_vote_count = ?;";
-        String insertSQL = "INSERT INTO vote_party (current_vote_count) VALUES (?) ON DUPLICATE KEY UPDATE current_vote_count = VALUES(current_vote_count);";
+        final String updateSQL = "UPDATE vote_party SET current_vote_count = ?;";
+        final String insertSQL = "INSERT INTO vote_party (current_vote_count) VALUES (?);";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
-            pstmt.setInt(1, currentGlobalVoteCount.get());
-            int rowsUpdated = pstmt.executeUpdate();
-            if (rowsUpdated == 0) {
-                try (PreparedStatement insertStmt = connection.prepareStatement(insertSQL)) {
-                    insertStmt.setInt(1, currentGlobalVoteCount.get());
-                    insertStmt.executeUpdate();
+        try {
+            try (PreparedStatement updateStmt = connection.prepareStatement(updateSQL)) {
+                updateStmt.setInt(1, currentGlobalVoteCount.get());
+                int rows = updateStmt.executeUpdate();
+                if (rows > 0) {
+                    return;
                 }
             }
+
+            try (PreparedStatement insertStmt = connection.prepareStatement(insertSQL)) {
+                insertStmt.setInt(1, currentGlobalVoteCount.get());
+                insertStmt.executeUpdate();
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-    /**
+    }    /**
      * Gets the current global vote count.
      * @return The current global vote count
      */
